@@ -18,12 +18,14 @@
 
     void getGuess()
     {
-        if (game.getCorrectWord().Equals(guessVar)){
-            displayCorrect = "correct!";
+        //game.getCorrectWord().Equals(guessVar)
+        if (String.Equals(game.getCorrectWord(), guessVar, StringComparison.OrdinalIgnoreCase))
+        {
+            displayCorrect = "You got the answer correct!";
         }
         else
         {
-            displayCorrect = "incorrect!";
+            displayCorrect = "You got the answer incorrect!";
         }
     }
 
