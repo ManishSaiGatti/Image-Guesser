@@ -20,5 +20,10 @@ namespace Image_Guesser.Data.Components
         {
             return imageUrl;
         }
+
+        public String getCorrectName()
+        {
+            return correctName;
+        }
     }
 }

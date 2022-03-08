@@ -8,7 +8,6 @@ namespace Image_Guesser.Data
 {
     public class Game
     {
-        private String correctWord;
         private Image currentImage;
 
         public Game()
@@ -18,7 +17,7 @@ namespace Image_Guesser.Data
 
         public String getCorrectWord()
         {
-            return correctWord;
+            return currentImage.getCorrectName();
         }
 
         public Image getCurrentImage()
