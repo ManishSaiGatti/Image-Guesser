@@ -1,17 +1,33 @@
 ﻿@page "/counter"
+@using Image_Guesser.Data
 
 <h1>Image Guesser</h1>
 <img src="https://static01.nyt.com/images/2021/09/14/science/07CAT-STRIPES/07CAT-STRIPES-mediumSquareAt3X-v2.jpg" alt="Cat" style="width:50px;height:60px;">
 <p>Current guess: @guessVar</p>
+<p>@displayCorrect</p>
 <button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
 <input id="guess" @bind="guessVar">
 
-@code {
-    private string guessVar = "j";
+
+@code
+{
+    private string displayCorrect = "false";
+    private string guessVar = "";
+    private string correctWord;
+    private Game game = new Game();
 
     void getGuess()
     {
-        //guessVar = "w";
-        //guessVar = guessText.Text.ToString();
+        //game.getCorrectWord().Equals(guessVar)
+        if (String.Equals(game.getCorrectWord(), guessVar, StringComparison.OrdinalIgnoreCase))
+        {
+            displayCorrect = "You got the answer correct!";
+        }
+        else
+        {
+            displayCorrect = "You got the answer incorrect!";
+        }
     }
+
+
 }
