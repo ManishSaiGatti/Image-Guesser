@@ -7,10 +7,11 @@
 <p>@displayCorrect</p>
 <button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
 <input id="guess" @bind="guessVar">
-
+<p style="width: 150px; border:3px; border-style:solid; border-color:#00ff00;"> Your Score: @score</p>
 
 @code
 {
+    private int score = 0;
     private string displayCorrect = "false";
     private string guessVar = "";
     private string correctWord;
@@ -22,6 +23,7 @@
         if (String.Equals(game.getCorrectWord(), guessVar, StringComparison.OrdinalIgnoreCase))
         {
             displayCorrect = "You got the answer correct!";
+            score += 100;
         }
         else
         {
