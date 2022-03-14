@@ -2,15 +2,54 @@
 
 <h1>Counter</h1>
 
-<p>Current count: @currentCount</p>
+<p>@show</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">Click me</button>
 
 @code {
-    private int currentCount = 0;
+    private int timer = 10;
+    private string show = "Time left: 10";
+    DateTime prev = DateTime.Now;
+    DateTime curr = DateTime.Now;
+    private void startTimer()
+    {
+        prev = DateTime.Now;
+        //this is a thread that calls itself
+        var loop = new Timer(new TimerCallback(_ =>
+        {
+            IncrementCount();
+            if (timer < 1)
+            {
+                show = "you have run out of time!";
 
+            }
+            else
+            {
+                show = "Time left: " + timer;
+            }
+            // Note that the following line is necessary because otherwise
+            // Blazor would not recognize the state change and not refresh the UI
+            InvokeAsync(() =>
+            {
+
+                StateHasChanged();
+            });
+        }), null, 500, 500);
+    }
     private void IncrementCount()
     {
-        currentCount++;
+        curr = DateTime.Now;
+
+        int deltaTime = curr.Second - prev.Second;
+        //edge case for when time wraps around 60 to 0
+        if (Math.Abs(deltaTime) >= 60) deltaTime = Math.Abs(deltaTime) - 60;
+        prev = curr;
+
+        timer -= deltaTime;
+    }
+
+    private void resetTimer()
+    {
+        timer = 50;
     }
 }
