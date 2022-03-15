@@ -4,13 +4,14 @@
 <h1>Image Guesser</h1>
 <img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCorrectWord()" style="width:50px;height:60px;">
 <p>Current guess: @guessVar</p>
-<p>@displayCorrect</p>
+<p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayCorrect</p>
 <button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
 <input id="guess" @bind="guessVar">
-<p style="width: 150px; border:3px; border-style:solid; border-color:#00ff00;"> Your Score: @score</p>
+<p style="width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> Your Score: @score</p>
 
 @code
-{
+{   
+    private string color = "blue";
     private int score = 0;
     private string displayCorrect = "false";
     private string guessVar = "";
@@ -24,10 +25,12 @@
         {
             displayCorrect = "You got the answer correct!";
             score += 100;
+            color = "lightgreen";
         }
         else
         {
             displayCorrect = "You got the answer incorrect!";
+            color = "darkorange";
         }
     }
 
