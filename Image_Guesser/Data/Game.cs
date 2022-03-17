@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Image_Guesser.Data.Components;
-
+using System.IO;
 namespace Image_Guesser.Data
 {
     public class Game
     {
         private Image currentImage;
-
+        private String[] directories;
         public Game()
         {
-            currentImage = new Image("cat", "https://static01.nyt.com/images/2021/09/14/science/07CAT-STRIPES/07CAT-STRIPES-mediumSquareAt3X-v2.jpg");
+            directories = Directory.GetDirectories(Directory.GetCurrentDirectory()+ "\\Data\\object_images_A-C");
+            currentImage = new Image("cat", "file:///C:/Users/s-msubotic/OneDrive%20-%20Lake%20Washington%20School%20District/aSenior%20Year%20%3BD/Advanced%20Projects/object_images_A-C/abacus/abacus_01b.jpg");
         }
 
         public String getCorrectWord()
@@ -23,6 +24,11 @@ namespace Image_Guesser.Data
         public Image getCurrentImage()
         {
             return currentImage;
+        }
+
+        public void makeNewImage()
+        {
+            currentImage = new Image(directories);
         }
     }
 }

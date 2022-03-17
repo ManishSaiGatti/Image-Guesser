@@ -9,7 +9,21 @@ namespace Image_Guesser.Data.Components
     {
         private String correctName;
         private String imageUrl;
-        
+        private const String imgFolder = "object_images_A-C";
+        public Image(String[] directories)
+        {
+            var rand = new Random();
+            int randIndex = rand.Next(directories.Length);
+            //this is to iterate through the path directory to find where the name of the image
+            //starts
+            int startIndex;
+            for(int i = 0; i< directories[randIndex].Length; i++)
+            {
+
+            }
+            imageUrl = directories[randIndex];
+
+        }
         public Image(String correctName, String imageUrl)
         {
             this.imageUrl = imageUrl;
