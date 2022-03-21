@@ -28,6 +28,7 @@ namespace Image_Guesser.Data
 
             return currentImage;
         }
+
         public int getBlurValue()
         {
             return currentImage.getBlurValue();
@@ -36,6 +37,16 @@ namespace Image_Guesser.Data
         public int getStartingTime()
         {
             return startingTime;
+        }
+
+        public int getImgHeight()
+        {
+            return currentImage.getImgHeight();
+        }
+
+        public int getStripWidth()
+        {
+            return currentImage.getStripWidth();
         }
     }
 }

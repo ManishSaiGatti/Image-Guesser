@@ -2,7 +2,20 @@
 @using Image_Guesser.Data
 
 <h1>Image Guesser</h1>
+
 <img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCorrectWord()" style="width:50px;height:60px;filter: blur(@game.getBlurValue()px)">
+
+<img src="Strips/VertStrip_0.png" style="width:5px;height:60px;" />
+<img src="Strips/VertStrip_1.png" style="width:5px;height:60px;" />
+<img src="Strips/VertStrip_2.png" style="width:5px;height:60px;" />
+<img src="Strips/VertStrip_3.png" style="width:5px;height:60px;" />
+<img src="Strips/VertStrip_4.png" style="width:5px;height:60px;" />
+<img src="Strips/VertStrip_5.png" style="width:5px;height:60px;" />
+<img src="Strips/VertStrip_6.png" style="width:5px;height:60px;" />
+<img src="Strips/VertStrip_7.png" style="width:5px;height:60px;" />
+<img src="Strips/VertStrip_8.png" style="width:5px;height:60px;" />
+<img src="Strips/VertStrip_9.png" style="width:5px;height:60px;" />
+
 <p>Current guess: @guessVar</p>
 <p>@displayCorrect</p>
 <button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
@@ -25,6 +38,8 @@
     private string guessVar = "";
     private string correctWord;
     private Game game = new Game();
+
+    //C:\Users\s-mgatti\Source\Repos\choice-project-image-guesser\Image_Guesser\Data\Strips\VertStrip_1.png
 
     void getGuess()
     {
