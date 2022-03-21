@@ -24,5 +24,15 @@ namespace Image_Guesser.Data
         {
             return currentImage;
         }
+
+        public int getImgHeight()
+        {
+            return currentImage.getImgHeight();
+        }
+
+        public int getStripWidth()
+        {
+            return currentImage.getStripWidth();
+        }
     }
 }
