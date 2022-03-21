@@ -77,7 +77,7 @@ namespace Image_Guesser.Data.Components
                             {
                                 //graphic.Clear(Color.Blue);
                                 graphic.DrawImage(strip, new Point(index * stripWidth + 5, 0));
-                                String savePath = "C:/Users/s-mgatti/Source/Repos/choice-project-image-guesser/Image_Guesser/wwwroot/VertStrip_" + index + ".png";
+                                String savePath = "C:/Users/s-mgatti/Source/Repos/choice-project-image-guesser/Image_Guesser/wwwroot/Strips/VertStrip_" + index + ".png";
                                 strip.Save(savePath);
                                 // C:\Users\s-mgatti\Source\Repos\choice-project-image-guesser\Image_Guesser\Data\Strips\
                             }
