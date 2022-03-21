@@ -12,7 +12,7 @@ namespace Image_Guesser.Data
         private String[] directories;
         public Game()
         {
-            directories = Directory.GetDirectories(Directory.GetCurrentDirectory()+ "\\Data\\object_images_A-C");
+            directories = Directory.GetDirectories(Directory.GetCurrentDirectory()+ "\\wwwroot\\object_images_A-C");
             currentImage = new Image(directories);// ("cat", "file:///C:/Users/s-msubotic/OneDrive%20-%20Lake%20Washington%20School%20District/aSenior%20Year%20%3BD/Advanced%20Projects/object_images_A-C/abacus/abacus_01b.jpg");
         }
 
