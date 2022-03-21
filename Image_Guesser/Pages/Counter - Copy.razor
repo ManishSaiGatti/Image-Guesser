@@ -5,7 +5,7 @@
 <link rel="stylesheet" type="text/css" href="StyleSheet.css" />
 
 <h1>Image Guesser</h1>
-<img class="blurredImage" src="@game.getCurrentImage().getImageUrl()" alt="@game.getCorrectWord()" style="width:50px;height:60px; filter:blur(@game.getBlurValue()px);">
+<img class="blurredImage" src="@game.getCurrentImage().getImageUrl()" alt="@game.getCorrectWord()" style="width:200px;height:200px; filter:blur(@game.getBlurValue()px);">
 <p>Current guess: @guessVar</p>
 <p>@displayCorrect</p>
 <button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
