@@ -1,27 +1,39 @@
 ﻿@page "/counter"
 @using Image_Guesser.Data
+@using System.Threading;
+
+
 
 <h1>Image Guesser</h1>
 <img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCorrectWord()" style="width:50px;height:60px;">
 <p>Current guess: @guessVar</p>
-<p>@displayCorrect</p>
+<p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayCorrect</p>
 <button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
 <input id="guess" @bind="guessVar">
-<p style="width: 150px; border:3px; border-style:solid; border-color:#00ff00;"> Your Score: @score</p>
+<p style="width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> Your Score: @score</p>
 
 <p>@show</p>
 
 <button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">Click me</button>
 
+<button class="btn btn-primary" @onclick="startNextRound" @onload="resetTimer">Next Round</button>
+
 @code
-{
-    private int timer = 10;
-    private string show = "Time left: 10";
+{   
+
+
+    private string color = "blue";
+
+
+    private int timer = 50;
+    private string show = "Time left: 50";
     DateTime prev = DateTime.Now;
     DateTime curr = DateTime.Now;
-              
+    private bool finishedRound = false;
+
+
     private int score = 0;
-    private string displayCorrect = "false";
+    private string displayCorrect = "Guess";
     private string guessVar = "";
     private string correctWord;
     private Game game = new Game();
@@ -32,11 +44,17 @@
         if (String.Equals(game.getCorrectWord(), guessVar, StringComparison.OrdinalIgnoreCase))
         {
             displayCorrect = "You got the answer correct!";
-            score += 100;
+            score += (timer * 2);
+            color = "lightgreen";
+            finishedRound = true;
+
+            startNextRound();
+
         }
         else
         {
             displayCorrect = "You got the answer incorrect!";
+            color = "darkorange";
         }
     }
 
@@ -50,6 +68,9 @@
             if (timer < 1)
             {
                 show = "you have run out of time!";
+                finishedRound = true;
+                startNextRound();
+
 
             }
             else
@@ -60,7 +81,6 @@
             // Blazor would not recognize the state change and not refresh the UI
             InvokeAsync(() =>
             {
-
                 StateHasChanged();
             });
         }), null, 500, 500);
@@ -71,14 +91,29 @@
 
         int deltaTime = curr.Second - prev.Second;
         //edge case for when time wraps around 60 to 0
-        if (Math.Abs(deltaTime) >= 60) deltaTime = Math.Abs(deltaTime) - 60;
+        if (Math.Abs(deltaTime) >= 59) deltaTime = Math.Abs(deltaTime) - 60;
         prev = curr;
 
-        timer -= deltaTime;
+        if (!finishedRound)
+        {
+            timer -= deltaTime;
+        }
+
+
     }
 
     private void resetTimer()
     {
         timer = 50;
+    }
+
+    private async void startNextRound()
+    {
+
+        await Task.Delay(2000);
+        timer = 50;
+        finishedRound = false;
+
+
     }
 }
