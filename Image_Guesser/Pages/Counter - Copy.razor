@@ -1,10 +1,11 @@
-﻿@page "/counter"
+﻿
+@page "/blurTest"
 @using Image_Guesser.Data
 
+<link rel="stylesheet" type="text/css" href="StyleSheet.css" />
+
 <h1>Image Guesser</h1>
-
-<img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="width:200px;height:240px;filter: blur(@game.getBlurValue()px)">
-
+<img class="blurredImage" src="@game.getCurrentImage().getImageUrl()" alt="@game.getCorrectWord()" style="width:50px;height:60px; filter:blur(@game.getBlurValue()px);">
 <p>Current guess: @guessVar</p>
 <p>@displayCorrect</p>
 <button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
@@ -21,7 +22,7 @@
     private string show = "Time left: 10";
     DateTime prev = DateTime.Now;
     DateTime curr = DateTime.Now;
-              
+
     private int score = 0;
     private string displayCorrect = "false";
     private string guessVar = "";
@@ -49,6 +50,7 @@
         var loop = new Timer(new TimerCallback(_ =>
         {
             IncrementCount();
+            game.getCurrentImage().decreaseBlur(timer);
             if (timer < 1)
             {
                 show = "you have run out of time!";
@@ -58,9 +60,9 @@
             {
                 show = "Time left: " + timer;
             }
-            // Note that the following line is necessary because otherwise
-            // Blazor would not recognize the state change and not refresh the UI
-            InvokeAsync(() =>
+        // Note that the following line is necessary because otherwise
+        // Blazor would not recognize the state change and not refresh the UI
+        InvokeAsync(() =>
             {
 
                 StateHasChanged();

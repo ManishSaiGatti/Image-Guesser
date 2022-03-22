@@ -9,8 +9,9 @@ namespace Image_Guesser.Data.Components
     {
         private String correctName;
         private String imageUrl;
+        private int blurValue;
         private const String imgFolder = "object_images_A-C";
-        public Image(String[] directories)
+        public Image(String[] directories, int startingTime)
         {
             var rand = new Random();
             int randIndex = rand.Next(directories.Length);
@@ -27,12 +28,9 @@ namespace Image_Guesser.Data.Components
             }
             correctName = directories[randIndex].Substring(startIndex);
             imageUrl = directories[randIndex].Substring(startIndex-(imgFolder.Length+1))+"\\" + correctName+"_0" + rand.Next(3,10)+ "s.jpg";
-
-        }
-        public Image(String correctName, String imageUrl)
-        {
-            this.imageUrl = imageUrl;
-            this.correctName = correctName;
+            // using 10 seconds as startingTime
+            // should scale blur based on image size
+            this.blurValue = startingTime;
         }
 
         public String getImageUrl()
@@ -44,5 +42,17 @@ namespace Image_Guesser.Data.Components
         {
             return correctName;
         }
+
+        public int getBlurValue()
+        {
+            return blurValue;
+        }
+
+        public void decreaseBlur(int timeLeft)
+        {
+            // should scale blur based on image size and timeLeft
+            blurValue = timeLeft;
+        }
+
     }
 }
