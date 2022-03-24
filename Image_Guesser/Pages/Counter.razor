@@ -49,6 +49,7 @@
         var loop = new Timer(new TimerCallback(_ =>
         {
             IncrementCount();
+            game.getCurrentImage().decreaseBlur(timer);
             if (timer < 1)
             {
                 show = "you have run out of time!";
