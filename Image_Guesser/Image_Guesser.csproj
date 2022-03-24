@@ -4,4 +4,12 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="StyleSheet.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="StyleSheet.css" />
+  </ItemGroup>
+
 </Project>
