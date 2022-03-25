@@ -48,5 +48,25 @@ namespace Image_Guesser.Data
         {
             return currentImage.getStripWidth();
         }
+
+        public String[] getVertStrips()
+        {
+            String[] arr = currentImage.getVerticalStrips();
+            /*String[] arr = new string[10];
+
+            arr[0] = "Strips/VertStrip_0.png";
+            arr[1] = "Strips/VertStrip_1.png";
+            arr[2] = "Strips/VertStrip_2.png";
+            arr[3] = "Strips/VertStrip_3.png";
+            arr[4] = "Strips/VertStrip_4.png";
+            arr[5] = "Strips/VertStrip_5.png";
+            arr[6] = "Strips/VertStrip_6.png";
+            arr[7] = "Strips/VertStrip_7.png";
+            arr[8] = "Strips/VertStrip_8.png";
+            arr[9] = "Strips/VertStrip_9.png";
+            */
+
+            return arr;
+        }
     }
 }

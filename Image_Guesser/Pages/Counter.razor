@@ -3,41 +3,44 @@
 
 <h1>Image Guesser</h1>
 
+<!--
 <img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCorrectWord()" style="width:50px;height:60px;filter: blur(@game.getBlurValue()px)">
+-->
 
-<img src="Strips/VertStrip_0.png" style="width:5px;height:60px;" />
-<img src="Strips/VertStrip_1.png" style="width:5px;height:60px;" />
-<img src="Strips/VertStrip_2.png" style="width:5px;height:60px;" />
-<img src="Strips/VertStrip_3.png" style="width:5px;height:60px;" />
-<img src="Strips/VertStrip_4.png" style="width:5px;height:60px;" />
-<img src="Strips/VertStrip_5.png" style="width:5px;height:60px;" />
-<img src="Strips/VertStrip_6.png" style="width:5px;height:60px;" />
-<img src="Strips/VertStrip_7.png" style="width:5px;height:60px;" />
-<img src="Strips/VertStrip_8.png" style="width:5px;height:60px;" />
-<img src="Strips/VertStrip_9.png" style="width:5px;height:60px;" />
+@{
+    for (int i = 0; i < 50; i++)
+    {
+        <img src="@stripOrder[i]" style="width:5px;height:300px;padding:0px;margin:0px;float:left" />
+    }
+}
 
-<p>Current guess: @guessVar</p>
-<p>@displayCorrect</p>
-<button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
-<input id="guess" @bind="guessVar">
-<p style="width: 150px; border:3px; border-style:solid; border-color:#00ff00;"> Your Score: @score</p>
+<div style="display:inline-grid">
+    <p>Current guess: @guessVar</p>
+    <p>@displayCorrect</p>
+    <button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
+    <input id="guess" @bind="guessVar">
+    <p style="width: 150px; border:3px; border-style:solid; border-color:#00ff00;"> Your Score: @score</p>
 
-<p>@show</p>
+    <p>@show</p>
 
-<button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">Click me</button>
+    <button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">Click me</button>
+</div>
 
 @code
 {
-    private int timer = 10;
-    private string show = "Time left: 10";
+    private int timer = 50;
+    private string show = "Time left: 50";
     DateTime prev = DateTime.Now;
     DateTime curr = DateTime.Now;
-              
+
     private int score = 0;
     private string displayCorrect = "false";
     private string guessVar = "";
     private string correctWord;
     private Game game = new Game();
+
+    private int numScrambles = -1;
+    private String[] stripOrder;
 
     //C:\Users\s-mgatti\Source\Repos\choice-project-image-guesser\Image_Guesser\Data\Strips\VertStrip_1.png
 
@@ -53,6 +56,32 @@
         {
             displayCorrect = "You got the answer incorrect!";
         }
+    }
+
+    Task setArray()
+    {
+        //String[] temp = game.getVertStrips();
+        stripOrder = game.getVertStrips();
+        Random rand = new Random();
+
+        int n = stripOrder.Length;
+        while (n > 1)
+        {
+            n--;
+            int k = rand.Next(n + 1);
+            String value = stripOrder[k];
+            stripOrder[k] = stripOrder[n];
+            stripOrder[n] = value;
+        }
+
+        Console.WriteLine(stripOrder.ToString());
+
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await setArray();
     }
 
     private void startTimer()
@@ -71,25 +100,65 @@
             {
                 show = "Time left: " + timer;
             }
-            // Note that the following line is necessary because otherwise
-            // Blazor would not recognize the state change and not refresh the UI
-            InvokeAsync(() =>
+        // Note that the following line is necessary because otherwise
+        // Blazor would not recognize the state change and not refresh the UI
+        InvokeAsync(() =>
             {
 
                 StateHasChanged();
             });
         }), null, 500, 500);
     }
+
     private void IncrementCount()
     {
         curr = DateTime.Now;
 
         int deltaTime = curr.Second - prev.Second;
         //edge case for when time wraps around 60 to 0
-        if (Math.Abs(deltaTime) >= 60) deltaTime = Math.Abs(deltaTime) - 60;
+        if (Math.Abs(deltaTime) >= 59) deltaTime = Math.Abs(deltaTime) - 60;
         prev = curr;
 
         timer -= deltaTime;
+
+        //Console.WriteLine(stripOrder.ToString());
+
+
+
+        numScrambles += 1;
+
+        bool run = true;
+        int numRuns = 0;
+        for (int i = 0; i < 10; i++)
+        {
+            while (run && numRuns < 50)
+            {
+                // 18 and 19
+                numRuns++;
+                Random rand = new Random();
+                int randIndex = rand.Next(0, 50);
+                String pathUrl = stripOrder[randIndex];
+                // Int32.TryParse(pathUrl.Substring(18, 2), out null);
+                int correctIndex;
+                if (Int32.TryParse(pathUrl.Substring(17, 2), out correctIndex))
+                {
+
+                }
+                else
+                {
+                    correctIndex = Int32.Parse(Char.ToString(pathUrl[pathUrl.Length - 5]));
+                }
+
+                if (randIndex != correctIndex)
+                {
+                    stripOrder[randIndex] = stripOrder[correctIndex];
+                    stripOrder[correctIndex] = pathUrl;
+                    numRuns = 11;
+                    run = false;
+                }
+
+            }
+        }
     }
 
     private void resetTimer()

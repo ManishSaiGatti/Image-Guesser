@@ -16,6 +16,8 @@ namespace Image_Guesser.Data.Components
         private int blurValue;
         private int imgHeight = 0;
         private int stripWidth = 0;
+
+        
         
         public Image(String correctName, String imageUrl, int startingTime)
         {
@@ -24,6 +26,8 @@ namespace Image_Guesser.Data.Components
             // using 10 seconds as startingTime
             // should scale blur based on image size
             this.blurValue = startingTime;
+
+            getVerticalStrips();
         }
 
         public String getImageUrl()
@@ -57,9 +61,9 @@ namespace Image_Guesser.Data.Components
             return stripWidth;
         }
 
-        public System.Drawing.Image[] getVerticalStrips()
+        public String[] getVerticalStrips()
         {
-            System.Drawing.Image[] strips;
+            String[] strips;
 
             using (var wc = new WebClient())
             {
@@ -71,9 +75,9 @@ namespace Image_Guesser.Data.Components
                         int width = img.Width;
                         imgHeight = img.Height;
 
-                        stripWidth = width / 10;
+                        stripWidth = width / 50;
 
-                        strips = new System.Drawing.Image[width / stripWidth];
+                        strips = new String[width / stripWidth];
 
                         //Graphics graphic = Graphics.FromImage(new Bitmap(img));
                         Bitmap bitmap = new Bitmap(img);
@@ -85,13 +89,13 @@ namespace Image_Guesser.Data.Components
                             boundaries.Width = stripWidth;
                             boundaries.Height = img.Height;
                             Bitmap strip = bitmap.Clone(boundaries, bitmap.PixelFormat);
-                            strips[index] = strip;
                             using (var graphic = Graphics.FromImage(strip))
                             {
                                 //graphic.Clear(Color.Blue);
-                                graphic.DrawImage(strip, new Point(index * stripWidth + 5, 0));
+                                graphic.DrawImage(strip, new Point(index * stripWidth, 0));
                                 String savePath = "C:/Users/s-mgatti/Source/Repos/choice-project-image-guesser/Image_Guesser/wwwroot/Strips/VertStrip_" + index + ".png";
                                 strip.Save(savePath);
+                                strips[index] = "Strips/VertStrip_" + index + ".png";
                                 // C:\Users\s-mgatti\Source\Repos\choice-project-image-guesser\Image_Guesser\Data\Strips\
                             }
                             index++;
