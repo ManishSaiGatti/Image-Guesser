@@ -6,7 +6,7 @@
 
 <h1>Image Guesser</h1>
 
-<img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="width:600px;height:540px;filter: blur(@game.getBlurValue()px)">
+<img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="width:400px;height:340px;filter: blur(@game.getBlurValue()px)">
 
 <p>Current guess: @guessVar</p>
 <p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayCorrect</p>
@@ -33,7 +33,7 @@
     DateTime curr = DateTime.Now;
     private bool finishedRound = false;
 
-
+    private int round = 1;
     private int score = 0;
     private string displayCorrect = "Guess";
     private string guessVar = "";
@@ -49,6 +49,8 @@
             score += (timer * 2);
             color = "lightgreen";
             finishedRound = true;
+            guessVar = "";
+            show = "Next round starting...";
 
 
         }
@@ -65,6 +67,15 @@
         //this is a thread that calls itself
         var loop = new Timer(new TimerCallback(_ =>
         {
+            if (round > 10)
+            {
+                show = "Thanks for playing! Your score was:" + score;
+                InvokeAsync(() =>
+                {
+                    StateHasChanged();
+                });
+                return;
+            }
             int blurVal = timer - 10;
             if (blurVal < 0) blurVal = 0;
             game.getCurrentImage().decreaseBlur(blurVal);
@@ -81,6 +92,13 @@
             }
             if (finishedRound)
             {
+
+                finishedRound = false;
+                Console.WriteLine("generatingnewimage");
+                resetTimer();
+                round++;
+                game.makeNewImage();
+                Thread.Sleep(2000);
                 startNextRound();
 
             }
@@ -119,15 +137,11 @@
         timer = 30;
     }
 
-    private async void startNextRound()
+    private void startNextRound()
     {
 
-        await Task.Delay(2000);
-        show = "Next round starting...";
-        Console.WriteLine("generatingnewimage");
-        game.makeNewImage();
-        resetTimer();
-        finishedRound = false;
+
+
         guessVar = "";
 
 
