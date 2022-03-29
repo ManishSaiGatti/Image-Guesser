@@ -16,7 +16,7 @@
 
 <p>@show</p>
 
-<button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">Click me</button>
+<button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">start game!</button>
 
 <button class="btn btn-primary" @onclick="startNextRound" @onload="resetTimer">Next Round</button>
 
@@ -38,6 +38,7 @@
     private string displayCorrect = "Guess";
     private string guessVar = "";
     private string correctWord;
+    private int endPoint;
     private Game game = new Game();
 
     void getGuess()
@@ -49,6 +50,7 @@
             score += (timer * 2);
             color = "lightgreen";
             finishedRound = true;
+            endPoint = timer;
             guessVar = "";
             show = "Next round starting...";
             Console.WriteLine("inGetGuess");
@@ -81,25 +83,28 @@
             game.getCurrentImage().decreaseBlur(blurVal);
             if (timer < 1)
             {
+                endPoint = timer;
                 show = "the correct word was: " + game.getCorrectWord()+ "\nyou have run out of time!";
                 if (!finishedRound)
                 {
                     finishedRound = true;
                 }
-
-
-
             }
             if (finishedRound)
             {
 
-                finishedRound = false;
-                Console.WriteLine("generatingnewimage");
-                resetTimer();
-                round++;
-                game.makeNewImage();
-                Thread.Sleep(2000);
-                startNextRound();
+
+                IncrementCount();
+                Console.WriteLine(timer + "\n");
+                if (timer-endPoint < -1)
+                {
+                    finishedRound = false;
+                    resetTimer();
+                    round++;
+                    game.makeNewImage();
+                    startNextRound();
+
+                }
 
             }
             else
@@ -124,10 +129,8 @@
         if (Math.Abs(deltaTime) >= 59) deltaTime = Math.Abs(deltaTime) - 58;
         prev = curr;
 
-        if (!finishedRound)
-        {
-            timer -= deltaTime;
-        }
+        timer -= deltaTime;
+        
 
 
     }
