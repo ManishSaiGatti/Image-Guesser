@@ -28,6 +28,7 @@ namespace Image_Guesser.Data.Components
             }
             correctName = directories[randIndex].Substring(startIndex);
             imageUrl = directories[randIndex].Substring(startIndex-(imgFolder.Length+1))+"\\" + correctName+"_0" + rand.Next(3,10)+ "s.jpg";
+            correctName = correctName.Replace('_', ' ');
             // using 10 seconds as startingTime
             // should scale blur based on image size
             this.blurValue = startingTime;

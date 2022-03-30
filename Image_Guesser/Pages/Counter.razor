@@ -1,44 +1,65 @@
 ﻿@page "/counter"
 @using Image_Guesser.Data
+@using System.Threading;
+
+
 
 <h1>Image Guesser</h1>
 
-<img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="width:200px;height:240px;filter: blur(@game.getBlurValue()px)">
+<img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="width:400px;height:340px;filter: blur(@game.getBlurValue()px)">
 
 <p>Current guess: @guessVar</p>
-<p>@displayCorrect</p>
+<p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayCorrect</p>
 <button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
 <input id="guess" @bind="guessVar">
-<p style="width: 150px; border:3px; border-style:solid; border-color:#00ff00;"> Your Score: @score</p>
+<p style="width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> Your Score: @score</p>
 
 <p>@show</p>
 
-<button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">Click me</button>
+<button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">start game!</button>
+
+<button class="btn btn-primary" @onclick="startNextRound" @onload="resetTimer">Next Round</button>
 
 @code
-{
-    private int timer = 10;
-    private string show = "Time left: 10";
+{   
+
+
+    private string color = "blue";
+
+
+    private int timer = 30;
+    private string show = "Welcome to Image Guesser";
     DateTime prev = DateTime.Now;
     DateTime curr = DateTime.Now;
-              
+    private bool finishedRound = false;
+
+    private int round = 1;
     private int score = 0;
-    private string displayCorrect = "false";
+    private string displayCorrect = "Guess";
     private string guessVar = "";
     private string correctWord;
+    private int endPoint;
     private Game game = new Game();
 
     void getGuess()
     {
         //game.getCorrectWord().Equals(guessVar)
-        if (String.Equals(game.getCorrectWord(), guessVar, StringComparison.OrdinalIgnoreCase))
+        if (String.Equals(game.getCorrectWord(), guessVar, StringComparison.OrdinalIgnoreCase)&&!finishedRound)
         {
             displayCorrect = "You got the answer correct!";
-            score += 100;
+            score += (timer * 2);
+            color = "lightgreen";
+            finishedRound = true;
+            endPoint = timer;
+            guessVar = "";
+            show = "Next round starting...";
+            Console.WriteLine("inGetGuess");
+
         }
         else
         {
             displayCorrect = "You got the answer incorrect!";
+            color = "darkorange";
         }
     }
 
@@ -48,22 +69,53 @@
         //this is a thread that calls itself
         var loop = new Timer(new TimerCallback(_ =>
         {
-            IncrementCount();
-            game.getCurrentImage().decreaseBlur(timer);
+            if (round > 10)
+            {
+                show = "Thanks for playing! Your score was:" + score;
+                InvokeAsync(() =>
+                {
+                    StateHasChanged();
+                });
+                return;
+            }
+            int blurVal = timer - 10;
+            if (blurVal < 0) blurVal = 0;
+            game.getCurrentImage().decreaseBlur(blurVal);
             if (timer < 1)
             {
-                show = "you have run out of time!";
+                endPoint = timer;
+                show = "the correct word was: " + game.getCorrectWord()+ "\nyou have run out of time!";
+                if (!finishedRound)
+                {
+                    finishedRound = true;
+                }
+            }
+            if (finishedRound)
+            {
+
+
+                IncrementCount();
+                Console.WriteLine(timer + "\n");
+                if (timer-endPoint < -1)
+                {
+                    finishedRound = false;
+                    resetTimer();
+                    round++;
+                    game.makeNewImage();
+                    startNextRound();
+
+                }
 
             }
             else
             {
+                IncrementCount();
                 show = "Time left: " + timer;
             }
-            // Note that the following line is necessary because otherwise
-            // Blazor would not recognize the state change and not refresh the UI
+            // the following line is so
+            // Blazor recognizes the state change and refreshes the UI
             InvokeAsync(() =>
             {
-
                 StateHasChanged();
             });
         }), null, 500, 500);
@@ -74,14 +126,27 @@
 
         int deltaTime = curr.Second - prev.Second;
         //edge case for when time wraps around 60 to 0
-        if (Math.Abs(deltaTime) >= 60) deltaTime = Math.Abs(deltaTime) - 60;
+        if (Math.Abs(deltaTime) >= 59) deltaTime = Math.Abs(deltaTime) - 58;
         prev = curr;
 
         timer -= deltaTime;
+        
+
+
     }
 
     private void resetTimer()
     {
-        timer = 50;
+        timer = 30;
+    }
+
+    private void startNextRound()
+    {
+
+
+
+        guessVar = "";
+
+
     }
 }
