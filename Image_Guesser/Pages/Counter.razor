@@ -1,7 +1,6 @@
-﻿@page "/counter"
+﻿@page "/"
 @using Image_Guesser.Data
 @using System.Threading;
-
 
 
 <h1>Image Guesser</h1>
@@ -54,7 +53,6 @@
             guessVar = "";
             show = "Next round starting...";
             Console.WriteLine("inGetGuess");
-
         }
         else
         {
@@ -92,8 +90,6 @@
             }
             if (finishedRound)
             {
-
-
                 IncrementCount();
                 Console.WriteLine(timer + "\n");
                 if (timer-endPoint < -1)
@@ -103,9 +99,7 @@
                     round++;
                     game.makeNewImage();
                     startNextRound();
-
                 }
-
             }
             else
             {
@@ -130,9 +124,6 @@
         prev = curr;
 
         timer -= deltaTime;
-        
-
-
     }
 
     private void resetTimer()
@@ -142,11 +133,6 @@
 
     private void startNextRound()
     {
-
-
-
         guessVar = "";
-
-
     }
 }
