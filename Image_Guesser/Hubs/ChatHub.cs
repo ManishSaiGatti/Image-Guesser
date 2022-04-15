@@ -8,15 +8,15 @@ namespace Image_Guesser.Hubs
 {
     public class ChatHub : Hub
     {
-        public async Task SendMessage(string user, string message)
+        public async Task SendMessage(string user, string message, string groupName)
         {   
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
+            await Clients.Group(groupName).SendAsync("ReceiveMessage", user, message);
         }
         public async Task AddToGroup(string groupName)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
 
-            await Clients.Group(groupName).SendAsync("Send", $"{Context.ConnectionId} has joined the group {groupName}.");
+            await Clients.Group(groupName).SendAsync("ReceiveMessage", Context.ConnectionId, $"{Context.ConnectionId} has joined the group {groupName}.");
         }
 
         public async Task RemoveFromGroup(string groupName)

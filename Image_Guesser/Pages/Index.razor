@@ -62,7 +62,7 @@
         await hubConnection.SendAsync("AddToGroup", groupInput);
 
     async Task Send() =>
-        await hubConnection.SendAsync("SendMessage", userInput, messageInput);
+        await hubConnection.SendAsync("SendMessage", userInput, messageInput, groupInput);
         
 
     public bool IsConnected =>
