@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.SignalR.Client
+@using Image_Guesser.Hubs;
 @inject NavigationManager NavigationManager
 @implements IAsyncDisposable
 
@@ -16,7 +17,13 @@
     </label>
 </div>
 <button @onclick="Send" disabled="@(!IsConnected)">Send</button>
-
+<div class="form-group">
+    <label>
+        Group:
+        <input @bind="groupInput" size="50" />
+    </label>
+</div>
+<button @onclick="AddToGroup" disabled="@(!IsConnected)">AddToGroup</button>
 <hr>
 
 <ul id="messagesList">
@@ -31,6 +38,8 @@
     private List<string> messages = new List<string>();
     private string userInput;
     private string messageInput;
+    private string groupInput;
+    ChatHub chatHub = new ChatHub();
 
     protected override async Task OnInitializedAsync()
     {
@@ -45,10 +54,16 @@
             StateHasChanged();
         });
         await hubConnection.StartAsync();
+  
+
+
     }
+    async Task AddToGroup() =>
+        await hubConnection.SendAsync("AddToGroup", groupInput);
 
     async Task Send() =>
         await hubConnection.SendAsync("SendMessage", userInput, messageInput);
+        
 
     public bool IsConnected =>
         hubConnection.State == HubConnectionState.Connected;
@@ -56,5 +71,6 @@
     public async ValueTask DisposeAsync()
     {
         await hubConnection?.DisposeAsync();
+
     }
 }
