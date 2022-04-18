@@ -14,6 +14,25 @@ namespace Image_Guesser.Data.Components
         private String correctName;
         private String imageUrl;
         private int blurValue;
+        private const String imgFolder = "object_images_A-C";
+        public Image(String[] directories, int startingTime)
+        {
+            var rand = new Random();
+            int randIndex = rand.Next(directories.Length);
+            //this is to iterate through the path directory to find where the name of the image
+            //starts
+            int startIndex = -1;
+            
+            for(int i = 0; i< directories[randIndex].Length-imgFolder.Length; i++)
+            {
+                if(directories[randIndex].Substring(i, imgFolder.Length).Equals(imgFolder))
+                {
+                    startIndex = i+imgFolder.Length+1;
+                }
+            }
+            correctName = directories[randIndex].Substring(startIndex);
+            imageUrl = directories[randIndex].Substring(startIndex-(imgFolder.Length+1))+"\\" + correctName+"_0" + rand.Next(3,10)+ "s.jpg";
+            correctName = correctName.Replace('_', ' ');
         private int imgHeight = 0;
         private int stripWidth = 0;
 
