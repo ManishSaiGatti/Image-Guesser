@@ -1,0 +1,75 @@
+﻿@page "/Lobby"
+<h1>Lobby</h1>
+<h5>Enter code to join a room</h5>
+
+<button class="btn btn-primary" id="guessText" @onclick="CreateRoom" style="visibility:@hideCreate">Create Room</button>
+<button class="btn btn-primary" id="guessText" @onclick="JoinRoom" style="visibility:@hideJoin">Join Room</button>
+
+<button class="btn btn-primary" id="guessText" @onclick="JoinRoom" style="visibility:@hideInput">Check For Room</button>
+<input id="guess" style="visibility:@hideInput" @bind="guess">
+<button class="btn btn-primary" disabled=@disableJoin style =" visibility:@hideInput"id="guessText" onclick="location.href='/counter'">Join Room</button>
+
+
+<p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @message</p>
+<h2 style="visibility:@hideCode">@codes</h2>
+<button class="btn btn-primary" id="guessText" @onclick="Back" style="visibility:@hideBack">Back</button>
+
+@code {
+
+    private String color = "red";
+    private String message = "";
+    private String guess = "";
+    private bool disableJoin = true;
+    private String hideCreate = "visible";
+    private String hideCode = "hidden";
+    private String hideJoin = "visible";
+    private String hideInput = "visible";
+    private String hideBack = "hidden";
+    private String hideMess = "visible";
+
+    public string codes = RandomString(5);
+    private static Random random = new Random();
+
+    public static string RandomString(int length)
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
+    private void CreateRoom()
+    {
+        hideCode = "visible";
+        hideInput = "visible";
+        hideJoin = "hidden";
+        hideBack = "visible";
+        hideCreate = "hidden";
+    }
+    private void JoinRoom()
+    {
+        hideCode = "hidden";
+        hideInput = "visible";
+        //hideCreate = "hidden";
+        hideBack = "visible";
+        //hideJoin = "hidden";
+
+        if (guess.ToLower().Equals(codes.ToLower()))
+        {
+            message = "Found a room";
+            disableJoin = false;
+        }
+        else
+        {
+            message = "Cannot find rooms";
+        }
+    }
+    private void Back()
+    {
+        hideCode = "hidden";
+        hideInput = "visible";
+        hideJoin = "visible";
+        hideBack = "hidden";
+        hideCreate = "visible";
+        message = "";
+    }
+
+}
