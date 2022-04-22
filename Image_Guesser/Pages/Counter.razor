@@ -3,8 +3,6 @@
 @using System.Threading;
 
 
-<h1>Image Guesser</h1>
-
 <img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="width:400px;height:340px;filter: blur(@game.getBlurValue()px)">
 
 <p>Current guess: @guessVar</p>
