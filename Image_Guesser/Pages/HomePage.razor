@@ -1,20 +1,40 @@
 ﻿@page "/Lobby"
+@using Microsoft.AspNetCore.SignalR.Client
+@using Image_Guesser.Hubs;
+@inject NavigationManager NavigationManager
 <h1>Lobby</h1>
 <h5>Enter code to join a room</h5>
 
-<button class="btn btn-primary" id="guessText" @onclick="CreateRoom" style="visibility:@hideCreate">Create Room</button>
-<button class="btn btn-primary" id="guessText" @onclick="JoinRoom" style="visibility:@hideJoin">Join Room</button>
+<button class="btn btn-primary" id="guessText" @onclick="CreateRoom" disabled="@(!IsConnected)" style="visibility:@hideCreate">Create Room</button>
+<button class="btn btn-primary" id="guessText" @onclick="JoinRoom" disabled="@(!IsConnected)" style="visibility:@hideJoin">Join Room</button>
 
 <button class="btn btn-primary" id="guessText" @onclick="JoinRoom" style="visibility:@hideInput">Check For Room</button>
-<input id="guess" style="visibility:@hideInput" @bind="guess">
-<button class="btn btn-primary" disabled=@disableJoin style =" visibility:@hideInput"id="guessText" onclick="location.href='/counter'">Join Room</button>
+<input id="guess" style="visibility:@hideInput" @bind="groupInput">
+<button class="btn btn-primary" disabled=@disableJoin style=" visibility:@hideInput" id="guessText" onclick="location.href='/counter'">Join Room</button>
 
 
 <p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @message</p>
 <h2 style="visibility:@hideCode">@codes</h2>
 <button class="btn btn-primary" id="guessText" @onclick="Back" style="visibility:@hideBack">Back</button>
 
+<ul id="userList">
+    @foreach (var user in users)
+    {
+        <li>@user</li>
+    }
+</ul>
+
 @code {
+
+    private HubConnection hubConnection;
+    private List<string> users = new List<string>();
+    
+
+
+    private string userInput;
+    private string messageInput;
+    private string groupInput;
+
 
     private String color = "red";
     private String message = "";
@@ -30,37 +50,64 @@
     public string codes = RandomString(5);
     private static Random random = new Random();
 
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var encodedMsg = $"{user}";
+            users.Add(encodedMsg);
+            StateHasChanged();
+        });
+        await hubConnection.StartAsync();
+
+
+
+    }
+
+    public bool IsConnected =>
+    hubConnection.State == HubConnectionState.Connected;
+
+    async Task CreateGroup() =>
+    await hubConnection.SendAsync("CreateGroup", groupInput);
+    
+    async Task JoinGroup() =>
+    await hubConnection.SendAsync("JoinGroup", groupInput); // how do i make this return a boolean??? cause this is where the method is being called
+
     public static string RandomString(int length)
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
     }
 
-    private void CreateRoom()
+    private async void CreateRoom()
     {
         hideCode = "visible";
-        hideInput = "visible";
+        hideInput = "hidden";
         hideJoin = "hidden";
-        hideBack = "visible";
+        hideBack = "hidden";
         hideCreate = "hidden";
+        groupInput = codes;
+        await CreateGroup();
     }
-    private void JoinRoom()
+    private async Task JoinRoom()
     {
-        hideCode = "hidden";
-        hideInput = "visible";
-        //hideCreate = "hidden";
-        hideBack = "visible";
-        //hideJoin = "hidden";
+        hideCode = "visible";
+        hideInput = "hidden";
+        hideCreate = "hidden";
+        hideBack = "hidden";
+        hideJoin = "hidden";
+        codes = groupInput;
 
-        if (guess.ToLower().Equals(codes.ToLower()))
-        {
-            message = "Found a room";
-            disableJoin = false;
-        }
-        else
-        {
-            message = "Cannot find rooms";
-        }
+        await JoinGroup();
+        
+        // need a way to detect if the join group has been succesful
+        // if join has been succesful, do above
+        // else, display a message and stay on the same screen
+        
     }
     private void Back()
     {
@@ -72,4 +119,9 @@
         message = "";
     }
 
+    public async ValueTask DisposeAsync()
+    {
+        await hubConnection?.DisposeAsync();
+
+    }
 }
