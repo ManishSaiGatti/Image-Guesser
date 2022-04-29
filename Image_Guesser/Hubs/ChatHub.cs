@@ -9,10 +9,13 @@ namespace Image_Guesser.Hubs
     public class ChatHub : Hub
     {
         
-        private Dictionary<String, String> userStorage;
+        private static Dictionary<String, String> userStorage = new Dictionary<string, string>();
         public ChatHub()
         {
-            userStorage = new Dictionary<string, string>();
+            if (userStorage == null)
+            {
+               // userStorage = new ;
+            }
         }
         public async Task SendMessage(string user, string message)
         {
