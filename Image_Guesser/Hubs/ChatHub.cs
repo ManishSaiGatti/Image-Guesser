@@ -30,6 +30,7 @@ namespace Image_Guesser.Hubs
             if (!userStorage.ContainsKey(groupName))
             {
                 userStorage.Add(groupName, new ArrayList());
+                userStorage.GetValueOrDefault(groupName).Add(Context.ConnectionId);
                 await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
                 Console.WriteLine(userStorage.GetValueOrDefault(Context.ConnectionId));
                 await Clients.Group(groupName).SendAsync("ReceiveMessage", groupName, $"{groupName} has been created.");
