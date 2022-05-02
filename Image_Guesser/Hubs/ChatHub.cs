@@ -15,34 +15,57 @@ namespace Image_Guesser.Hubs
 
     public class ChatHub : Hub
     {
-        private static Dictionary<String, String> userStorage = new Dictionary<string, string>();
+        private static Dictionary<String, ArrayList> userStorage = new Dictionary<String, ArrayList>();
         public async Task SendMessage(string user, string message, string groupName)
         {
             if (userStorage.ContainsKey(Context.ConnectionId))
             {
                 Console.WriteLine("sending message rn");
-                await Clients.Group(userStorage.GetValueOrDefault(Context.ConnectionId)).SendAsync("ReceiveMessage", user, message);
+                
+                await Clients.Group(groupName).SendAsync("ReceiveMessage", user, message);
             }
         }
         public async Task AddToGroup(string groupName)
         {
-            if (!userStorage.ContainsKey(Context.ConnectionId))
+            if (!userStorage.ContainsKey(groupName))
             {
-                userStorage.Add(Context.ConnectionId, groupName);
+                userStorage.Add(groupName, new ArrayList());
                 await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
                 Console.WriteLine(userStorage.GetValueOrDefault(Context.ConnectionId));
-                await Clients.Group(groupName).SendAsync("ReceiveMessage", Context.ConnectionId, $"{Context.ConnectionId} has joined the group {groupName}.");
+                await Clients.Group(groupName).SendAsync("ReceiveMessage", groupName, $"{groupName} has been created.");
+
+            }
+            else
+            {
+                ArrayList work = userStorage.GetValueOrDefault(groupName);
+                if (!work.Contains(Context.ConnectionId))
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+                    await Clients.Group(groupName).SendAsync("ReceiveMessage", Context.ConnectionId, $"{Context.ConnectionId} has joined the group {groupName}.");
+                    work.Add(Context.ConnectionId);
+                }
             }
 
         }
 
-        public async Task RemoveFromGroup()
+        public async Task RemoveFromGroup(String groupName)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
-            userStorage.Remove(Context.ConnectionId);
+            if (userStorage.ContainsKey(groupName))
+            {
+                userStorage.GetValueOrDefault(groupName).Remove(Context.ConnectionId);
+                await Clients.Group(groupName).SendAsync("Send", $"{Context.ConnectionId} has left the group {groupName}.");
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+            }
+        }
 
-            await Clients.Group(groupName).SendAsync("Send", $"{Context.ConnectionId} has left the group {groupName}.");
-
+        public static List<String> getUserList(String groupName)
+        {
+            if (userStorage.ContainsKey(groupName))
+            {
+                return userStorage.GetValueOrDefault(groupName).Cast<String>().ToList();
+            }
+            return null;
         }
     }
+        
 }

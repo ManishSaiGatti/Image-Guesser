@@ -52,7 +52,7 @@
         hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
         {
             var encodedMsg = $"{user}: {message}";
-            messages.Add(encodedMsg);
+            messages = ChatHub.getUserList(groupInput);
             StateHasChanged();
         });
         await hubConnection.StartAsync();
