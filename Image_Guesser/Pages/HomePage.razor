@@ -8,10 +8,7 @@
 <button class="btn btn-primary" id="guessText" @onclick="CreateRoom" disabled="@(!IsConnected)" style="visibility:@hideCreate">Create Room</button>
 <button class="btn btn-primary" id="guessText" @onclick="JoinRoom" disabled="@(!IsConnected)" style="visibility:@hideJoin">Join Room</button>
 
-<button class="btn btn-primary" id="guessText" @onclick="JoinRoom" style="visibility:@hideInput">Check For Room</button>
 <input id="guess" style="visibility:@hideInput" @bind="groupInput">
-<button class="btn btn-primary" disabled=@disableJoin style=" visibility:@hideInput" id="guessText" onclick="location.href='/counter'">Join Room</button>
-
 
 <p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @message</p>
 <h2 style="visibility:@hideCode">@codes</h2>
