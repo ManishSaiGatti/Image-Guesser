@@ -56,7 +56,7 @@
         hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
         {
             var encodedMsg = $"{user}";
-            users.Add(encodedMsg);
+            users = ChatHub.getUserList(groupInput);
             StateHasChanged();
         });
         await hubConnection.StartAsync();
@@ -69,10 +69,10 @@
     hubConnection.State == HubConnectionState.Connected;
 
     async Task CreateGroup() =>
-    await hubConnection.SendAsync("CreateGroup", groupInput);
+    await hubConnection.SendAsync("AddToGroup", groupInput);
     
     async Task JoinGroup() =>
-    await hubConnection.SendAsync("JoinGroup", groupInput); // how do i make this return a boolean??? cause this is where the method is being called
+    await hubConnection.SendAsync("AddToGroup", groupInput); // how do i make this return a boolean??? cause this is where the method is being called
 
     public static string RandomString(int length)
     {
@@ -88,6 +88,7 @@
         hideBack = "hidden";
         hideCreate = "hidden";
         groupInput = codes;
+
         await CreateGroup();
     }
     private async Task JoinRoom()
