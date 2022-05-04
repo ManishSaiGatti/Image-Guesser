@@ -9,8 +9,10 @@
 <button class="btn btn-primary" id="guessText" @onclick="JoinRoom" disabled="@(!IsConnected)" style="visibility:@hideJoin">Join Room</button>
 
 <button class="btn btn-primary" id="guessText" @onclick="JoinRoom" style="visibility:@hideInput">Check For Room</button>
-<input id="guess" style="visibility:@hideInput" @bind="groupInput">
+<input id="groupBox" style="visibility:@hideInput" @bind="groupInput">
 <button class="btn btn-primary" disabled=@disableJoin style=" visibility:@hideInput" id="guessText" onclick="location.href='/counter'">Join Room</button>
+<input id="userBox" style="visibility:@hideInput" @bind="userInput">
+<button class="btn btn-primary" id="readyButton" @onclick="setReadyStatus" disabled="@(!IsConnected)" style="visibility:@hideReady">set ready status</button>
 
 
 <p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @message</p>
@@ -28,7 +30,7 @@
 
     private HubConnection hubConnection;
     private List<string> users = new List<string>();
-    
+
 
 
     private string userInput;
@@ -46,7 +48,7 @@
     private String hideInput = "visible";
     private String hideBack = "hidden";
     private String hideMess = "visible";
-
+    private String hideReady = "hidden";
     public string codes = RandomString(5);
     private static Random random = new Random();
 
@@ -72,10 +74,13 @@
     hubConnection.State == HubConnectionState.Connected;
 
     async Task CreateGroup() =>
-    await hubConnection.SendAsync("AddToGroup", groupInput);
-    
+    await hubConnection.SendAsync("AddToGroup", groupInput, userInput);
+
     async Task JoinGroup() =>
-    await hubConnection.SendAsync("AddToGroup", groupInput); // how do i make this return a boolean??? cause this is where the method is being called
+    await hubConnection.SendAsync("AddToGroup", groupInput, userInput); // how do i make this return a boolean??? cause this is where the method is being called
+
+    async Task ReadyStatus() =>
+    await hubConnection.SendAsync("changeStatus", userInput);
 
     public static string RandomString(int length)
     {
@@ -90,6 +95,8 @@
         hideJoin = "hidden";
         hideBack = "hidden";
         hideCreate = "hidden";
+        hideReady = "visible";
+
         groupInput = codes;
 
         await CreateGroup();
@@ -101,14 +108,20 @@
         hideCreate = "hidden";
         hideBack = "hidden";
         hideJoin = "hidden";
+        hideReady = "visible";
         codes = groupInput;
 
         await JoinGroup();
-        
+
         // need a way to detect if the join group has been succesful
         // if join has been succesful, do above
         // else, display a message and stay on the same screen
-        
+
+    }
+    private async Task setReadyStatus()
+    {
+        //expects chathub to flip the boolean for one of the ready status field
+        await ReadyStatus();
     }
     private void Back()
     {
@@ -117,6 +130,7 @@
         hideJoin = "visible";
         hideBack = "hidden";
         hideCreate = "visible";
+        hideReady = "hidden";
         message = "";
     }
 
