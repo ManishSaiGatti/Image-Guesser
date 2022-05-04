@@ -95,6 +95,11 @@ namespace Image_Guesser.Hubs
             }
             return null;
         }
+        
+        public void ChangeStatus(string groupName, string userInput)
+        {
+            searchUsers(groupName, userInput).changeReady();
+        }
 
         private User searchUsers(String groupName, String userName)
         {
