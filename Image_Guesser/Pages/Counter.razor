@@ -1,8 +1,6 @@
-﻿@page "/counter"
+﻿@page "/{testCode}"
 @using Image_Guesser.Data
 @using System.Threading;
-
-
 
 <h1>Image Guesser</h1>
 
@@ -20,9 +18,12 @@
 
 <button class="btn btn-primary" @onclick="startNextRound" @onload="resetTimer">Next Round</button>
 
+
 @code
 {   
 
+    [Parameter]
+    public string testCode { get; set; }
 
     private string color = "blue";
 
@@ -130,7 +131,7 @@
         prev = curr;
 
         timer -= deltaTime;
-        
+
 
 
     }
