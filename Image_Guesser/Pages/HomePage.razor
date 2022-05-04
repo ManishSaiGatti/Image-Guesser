@@ -14,7 +14,6 @@
 <input id="userBox" style="visibility:@hideInput" @bind="userInput">
 <button class="btn btn-primary" id="readyButton" @onclick="setReadyStatus" disabled="@(!IsConnected)" style="visibility:@hideReady">set ready status</button>
 
-
 <p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @message</p>
 <h2 style="visibility:@hideCode">@codes</h2>
 <button class="btn btn-primary" id="guessText" @onclick="Back" style="visibility:@hideBack">Back</button>
