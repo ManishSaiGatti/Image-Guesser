@@ -52,17 +52,11 @@ namespace Image_Guesser.Hubs
                 await Clients.Group(groupName).SendAsync("ReceiveMessage", user, message);
             }
         }
-        public async Task AddToGroup(string groupName)
+        public async Task<bool> AddToGroup(string groupName, string userName)
         {
-            string userName = "";
             if (!userStorage.ContainsKey(groupName))
             {
-                userStorage.Add(groupName, new ArrayList());
-                userStorage.GetValueOrDefault(groupName).Add(new User(Context.ConnectionId, userName));
-                await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-                Console.WriteLine(userStorage.GetValueOrDefault(Context.ConnectionId));
-                await Clients.Group(groupName).SendAsync("ReceiveMessage", groupName, $"{groupName} has been created.");
-
+                return false;
             }
             else
             {
@@ -71,10 +65,21 @@ namespace Image_Guesser.Hubs
                 {
                     await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
                     await Clients.Group(groupName).SendAsync("ReceiveMessage", Context.ConnectionId, $"{Context.ConnectionId} has joined the group {groupName}.");
-                    work.Add(Context.ConnectionId);
+                    work.Add(new User(Context.ConnectionId, userName));
                 }
+                return true;
             }
 
+        }
+
+        public async Task CreateGroup(string groupName, string userName)
+        {
+            userStorage.Add(groupName, new ArrayList());
+            userStorage.GetValueOrDefault(groupName).Add(new User(Context.ConnectionId, userName));
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+            Console.WriteLine(userStorage.GetValueOrDefault(Context.ConnectionId));
+            await Clients.Group(groupName).SendAsync("ReceiveMessage", groupName, $"{groupName} has been created.");
+    
         }
 
         public async Task RemoveFromGroup(String groupName, String userName)
@@ -89,9 +94,15 @@ namespace Image_Guesser.Hubs
         
         public static List<String> getUserList(String groupName)
         {
+            List<String> temp = new List<String>();
             if (userStorage.ContainsKey(groupName))
             {
-                return userStorage.GetValueOrDefault(groupName).Cast<String>().ToList();
+
+                foreach (User user in userStorage.GetValueOrDefault(groupName))
+                {
+                    temp.Add(user.getUserName());
+                }
+                return temp;
             }
             return null;
         }

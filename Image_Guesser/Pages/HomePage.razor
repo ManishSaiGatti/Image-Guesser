@@ -1,4 +1,4 @@
-﻿@page "/Lobby"
+﻿@page "/Lobby" 
 @using Microsoft.AspNetCore.SignalR.Client
 @using Image_Guesser.Hubs;
 @inject NavigationManager NavigationManager
@@ -8,10 +8,11 @@
 <button class="btn btn-primary" id="guessText" @onclick="CreateRoom" disabled="@(!IsConnected)" style="visibility:@hideCreate">Create Room</button>
 <button class="btn btn-primary" id="guessText" @onclick="JoinRoom" disabled="@(!IsConnected)" style="visibility:@hideJoin">Join Room</button>
 
-<button class="btn btn-primary" id="guessText" @onclick="JoinRoom" style="visibility:@hideInput">Check For Room</button>
 <input id="groupBox" style="visibility:@hideInput" @bind="groupInput">
-<button class="btn btn-primary" disabled=@disableJoin style=" visibility:@hideInput" id="guessText" onclick="location.href='/counter'">Join Room</button>
+<h5>Enter Username</h5>
 <input id="userBox" style="visibility:@hideInput" @bind="userInput">
+<button class="btn btn-primary" id="submitButton" @onclick="checkValidName"  style="visibility:@hideJoin">Submit</button>
+
 <button class="btn btn-primary" id="readyButton" @onclick="setReadyStatus" disabled="@(!IsConnected)" style="visibility:@hideReady">set ready status</button>
 
 
@@ -20,7 +21,7 @@
 <button class="btn btn-primary" id="guessText" @onclick="Back" style="visibility:@hideBack">Back</button>
 
 <ul id="userList">
-    @foreach (var user in users)
+    @foreach (String user in users)
     {
         <li>@user</li>
     }
@@ -42,6 +43,7 @@
     private String message = "";
     private String guess = "";
     private bool disableJoin = true;
+    private bool isInvalidName = true;
     private String hideCreate = "visible";
     private String hideCode = "hidden";
     private String hideJoin = "visible";
@@ -73,11 +75,14 @@
     public bool IsConnected =>
     hubConnection.State == HubConnectionState.Connected;
 
-    async Task CreateGroup() =>
-    await hubConnection.SendAsync("AddToGroup", groupInput, userInput);
 
-    async Task JoinGroup() =>
-    await hubConnection.SendAsync("AddToGroup", groupInput, userInput); // how do i make this return a boolean??? cause this is where the method is being called
+
+    async Task CreateGroup() =>
+    await hubConnection.SendAsync("CreateGroup", groupInput, userInput);
+
+    async Task<bool> JoinGroup() =>
+     await hubConnection.InvokeAsync<bool>("AddToGroup", groupInput, userInput); // how do i make this return a boolean??? cause this is where the method is being called
+
 
     async Task ReadyStatus() =>
     await hubConnection.SendAsync("ChangeStatus", groupInput, userInput);
@@ -103,6 +108,21 @@
     }
     private async Task JoinRoom()
     {
+        /*
+        if(await JoinGroup())
+        {
+            hideCode = "visible";
+            hideInput = "hidden";
+            hideCreate = "hidden";
+            hideBack = "hidden";
+            hideJoin = "hidden";
+            hideReady = "visible";
+            codes = groupInput;
+        } else
+        {
+            message = "this room doesn't exist";
+        }
+        */
         hideCode = "visible";
         hideInput = "hidden";
         hideCreate = "hidden";
@@ -110,18 +130,22 @@
         hideJoin = "hidden";
         hideReady = "visible";
         codes = groupInput;
-
         await JoinGroup();
 
         // need a way to detect if the join group has been succesful
         // if join has been succesful, do above
         // else, display a message and stay on the same screen
 
-    }
+        }
     private async Task setReadyStatus()
     {
         //expects chathub to flip the boolean for one of the ready status field
         await ReadyStatus();
+    }
+
+    private async Task checkValidName()
+    {
+        checkName();
     }
     private void Back()
     {
@@ -139,4 +163,19 @@
         await hubConnection?.DisposeAsync();
 
     }
+
+    // want to be able to disable the join and create button if a userName is not inputted. 
+    public void checkName()
+    {
+        if(userInput != "")
+        {
+            isInvalidName = false;
+        } else
+        {
+            isInvalidName = true;
+
+        }
+
+    }
+
 }
