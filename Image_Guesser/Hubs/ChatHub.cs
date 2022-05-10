@@ -56,7 +56,12 @@ namespace Image_Guesser.Hubs
         {
             if (!userStorage.ContainsKey(groupName))
             {
-                return false;
+                userStorage.Add(groupName, new ArrayList());
+                userStorage.GetValueOrDefault(groupName).Add(new User(Context.ConnectionId, userName));
+                await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+                Console.WriteLine(userStorage.GetValueOrDefault(Context.ConnectionId));
+                await Clients.Group(groupName).SendAsync("ReceiveMessage", groupName, $"{groupName} has been created.");
+                return true;
             }
             else
             {
@@ -71,7 +76,18 @@ namespace Image_Guesser.Hubs
             }
 
         }
+        public async Task<bool> CheckGroup(string groupName)
+        {
+            if (!userStorage.ContainsKey(groupName))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
 
+        }
         public async Task CreateGroup(string groupName, string userName)
         {
             userStorage.Add(groupName, new ArrayList());

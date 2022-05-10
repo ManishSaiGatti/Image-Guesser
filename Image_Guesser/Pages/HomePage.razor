@@ -1,40 +1,26 @@
-﻿@page "/Lobby" 
+﻿@page "/" 
 @using Microsoft.AspNetCore.SignalR.Client
 @using Image_Guesser.Hubs;
 @inject NavigationManager NavigationManager
-<h1>Lobby</h1>
-<h5>Enter code to join a room</h5>
+<h1>HomePage</h1>
+<h5 >Enter code to join a room</h5>
 
-<button class="btn btn-primary" id="guessText" @onclick="CreateRoom" disabled="@(!IsConnected)" style="visibility:@hideCreate">Create Room</button>
-<button class="btn btn-primary" id="guessText" @onclick="JoinRoom" disabled="@(!IsConnected)" style="visibility:@hideJoin">Join Room</button>
+<button class="btn btn-primary" id="guessText" @onclick="CreateRoom" disabled="@(!IsConnected)" >Create Room</button>
+<button class="btn btn-primary" id="guessText" @onclick="JoinRoom" disabled="@(!IsConnected)" >Join Room</button>
 
-<input id="groupBox" style="visibility:@hideInput" @bind="groupInput">
-<h5>Enter Username</h5>
-<input id="userBox" style="visibility:@hideInput" @bind="userInput">
-<button class="btn btn-primary" id="submitButton" @onclick="checkValidName"  style="visibility:@hideJoin">Submit</button>
-
-<button class="btn btn-primary" id="readyButton" @onclick="setReadyStatus" disabled="@(!IsConnected)" style="visibility:@hideReady">set ready status</button>
-
+<input id="groupBox"  @bind="groupInput">
 
 <p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @message</p>
-<h2 style="visibility:@hideCode">@codes</h2>
-<button class="btn btn-primary" id="guessText" @onclick="Back" style="visibility:@hideBack">Back</button>
 
-<ul id="userList">
-    @foreach (String user in users)
-    {
-        <li>@user</li>
-    }
-</ul>
+
 
 @code {
 
     private HubConnection hubConnection;
-    private List<string> users = new List<string>();
 
 
 
-    private string userInput;
+
     private string messageInput;
     private string groupInput;
 
@@ -44,13 +30,6 @@
     private String guess = "";
     private bool disableJoin = true;
     private bool isInvalidName = true;
-    private String hideCreate = "visible";
-    private String hideCode = "hidden";
-    private String hideJoin = "visible";
-    private String hideInput = "visible";
-    private String hideBack = "hidden";
-    private String hideMess = "visible";
-    private String hideReady = "hidden";
     public string codes = RandomString(5);
     private static Random random = new Random();
 
@@ -63,7 +42,6 @@
         hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
         {
             var encodedMsg = $"{user}";
-            users = ChatHub.getUserList(groupInput);
             StateHasChanged();
         });
         await hubConnection.StartAsync();
@@ -76,16 +54,8 @@
     hubConnection.State == HubConnectionState.Connected;
 
 
-
-    async Task CreateGroup() =>
-    await hubConnection.SendAsync("CreateGroup", groupInput, userInput);
-
-    async Task<bool> JoinGroup() =>
-     await hubConnection.InvokeAsync<bool>("AddToGroup", groupInput, userInput); // how do i make this return a boolean??? cause this is where the method is being called
-
-
-    async Task ReadyStatus() =>
-    await hubConnection.SendAsync("ChangeStatus", groupInput, userInput);
+    async Task<bool> CheckGroup() =>
+     await hubConnection.InvokeAsync<bool>("CheckGroup", groupInput); 
 
     public static string RandomString(int length)
     {
@@ -95,86 +65,27 @@
 
     private async void CreateRoom()
     {
-        hideCode = "visible";
-        hideInput = "hidden";
-        hideJoin = "hidden";
-        hideBack = "hidden";
-        hideCreate = "hidden";
-        hideReady = "visible";
-
-        groupInput = codes;
-
-        await CreateGroup();
+        NavigationManager.NavigateTo("/lobby?gamecode=" + codes);
     }
+    // checks to see if room is available
     private async Task JoinRoom()
     {
-        /*
-        if(await JoinGroup())
+        // if available, join the room
+        if(await CheckGroup())
         {
-            hideCode = "visible";
-            hideInput = "hidden";
-            hideCreate = "hidden";
-            hideBack = "hidden";
-            hideJoin = "hidden";
-            hideReady = "visible";
-            codes = groupInput;
-        } else
+            NavigationManager.NavigateTo("/lobby?gamecode=" + codes);
+        } else // if not avaiable, display  message
         {
             message = "this room doesn't exist";
         }
-        */
-        hideCode = "visible";
-        hideInput = "hidden";
-        hideCreate = "hidden";
-        hideBack = "hidden";
-        hideJoin = "hidden";
-        hideReady = "visible";
-        codes = groupInput;
-        await JoinGroup();
 
-        // need a way to detect if the join group has been succesful
-        // if join has been succesful, do above
-        // else, display a message and stay on the same screen
 
-        }
-    private async Task setReadyStatus()
-    {
-        //expects chathub to flip the boolean for one of the ready status field
-        await ReadyStatus();
-    }
-
-    private async Task checkValidName()
-    {
-        checkName();
-    }
-    private void Back()
-    {
-        hideCode = "hidden";
-        hideInput = "visible";
-        hideJoin = "visible";
-        hideBack = "hidden";
-        hideCreate = "visible";
-        hideReady = "hidden";
-        message = "";
-    }
+     }
+    
 
     public async ValueTask DisposeAsync()
     {
         await hubConnection?.DisposeAsync();
-
-    }
-
-    // want to be able to disable the join and create button if a userName is not inputted. 
-    public void checkName()
-    {
-        if(userInput != "")
-        {
-            isInvalidName = false;
-        } else
-        {
-            isInvalidName = true;
-
-        }
 
     }
 
