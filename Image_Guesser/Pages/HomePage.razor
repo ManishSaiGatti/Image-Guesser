@@ -80,7 +80,7 @@
     await hubConnection.SendAsync("AddToGroup", groupInput, userInput); // how do i make this return a boolean??? cause this is where the method is being called
 
     async Task ReadyStatus() =>
-    await hubConnection.SendAsync("changeStatus", userInput);
+    await hubConnection.SendAsync("changeStatus", groupInput,  userInput);
 
     public static string RandomString(int length)
     {
