@@ -1,6 +1,8 @@
-﻿@page "/GamePage"
+﻿@page "/counter"
 @using Image_Guesser.Data
 @using System.Threading;
+
+
 
 <h1>Image Guesser</h1>
 
@@ -12,18 +14,15 @@
 <input id="guess" @bind="guessVar">
 <p style="width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> Your Score: @score</p>
 
-
+<p>@show</p>
 
 <button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">start game!</button>
 
 <button class="btn btn-primary" @onclick="startNextRound" @onload="resetTimer">Next Round</button>
 
-
 @code
 {   
 
-    [Parameter]
-    public string testCode { get; set; }
 
     private string color = "blue";
 
@@ -131,7 +130,7 @@
         prev = curr;
 
         timer -= deltaTime;
-
+        
 
 
     }
