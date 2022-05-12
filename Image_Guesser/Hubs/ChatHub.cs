@@ -42,10 +42,11 @@ namespace Image_Guesser.Hubs
 
     public class ChatHub : Hub
     {
+        // the key is group code, the ArrayList contains all users in the group
         private static Dictionary<String, ArrayList> userStorage = new Dictionary<String, ArrayList>();
         public async Task SendMessage(string user, string message, string groupName)
         {
-            if (userStorage.ContainsKey(Context.ConnectionId))
+            if (userStorage.ContainsKey(groupName))
             {
                 Console.WriteLine("sending message rn");
                 
@@ -107,8 +108,8 @@ namespace Image_Guesser.Hubs
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
             }
         }
-        
-        public static List<String> getUserList(String groupName)
+
+        public static List<String> getUsernameList(String groupName)
         {
             List<String> temp = new List<String>();
             if (userStorage.ContainsKey(groupName))
@@ -122,7 +123,18 @@ namespace Image_Guesser.Hubs
             }
             return null;
         }
-        
+
+        public static List<User> getUserList(String groupName)
+        {
+            List<User> temp = new List<User>();
+            if (userStorage.ContainsKey(groupName))
+            {
+
+                userStorage.GetValueOrDefault(groupName);
+
+            }
+            return null;
+        }
         public void ChangeStatus(string groupName, string userInput)
         {
             searchUsers(groupName, userInput).changeReady();
@@ -140,5 +152,6 @@ namespace Image_Guesser.Hubs
             return null;
         }
     }
-        
+    
+    
 }

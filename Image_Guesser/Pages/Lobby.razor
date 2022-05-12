@@ -3,33 +3,61 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.AspNetCore.WebUtilities;
 @using Image_Guesser.Hubs;
+@using Image_Guesser.Data
 @inject NavigationManager NavigationManager
+
 <h1>Lobby</h1>
 
-<h5 style="visibility: @hideEnterCodeMsg" > Enter Username</h5>
-<input id="userBox" style="visibility:@hideInput" @bind="userInput">
-<button class="btn btn-primary" id="submitButton" @onclick="JoinGroup" disabled="@(!CanJoinLobby)" style="visibility:@hideJoin">Submit</button>
+<h5 style="visibility: @enterNameScreenVisible" > Enter Username</h5>
+<input id="userBox" style="visibility:@enterNameScreenVisible" @bind="userInput">
+<button class="btn btn-primary" id="submitButton" @onclick="JoinRoom" disabled="@(!CanJoinLobby)" style="visibility:@enterNameScreenVisible">Submit</button>
 
-<button class="btn btn-primary" id="readyButton" @onclick="setReadyStatus" disabled="@(!IsConnected)" style="visibility:@hideReady">set ready status</button>
+<button class="btn btn-primary" id="readyButton" @onclick="setReadyStatus" disabled="@(!IsConnected)" style="visibility:@readyButtonVisisble">set ready status</button>
 
 
 <p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @message</p>
-<h2 style="visibility:@hideCode">@gameCode</h2>
+<h2 style="visibility:@lobbyScreenVisible">@gameCode</h2>
 
 
-<ul id="userList">
+<ul id="userList" style="visibility:@lobbyScreenVisible">
     @foreach (String user in users)
     {
         <li>@user</li>
     }
 </ul>
 
+<button class="btn btn-primary" id="startButton" @onclick="SendGameStart" disabled="@(!IsConnected)" style="visibility:@lobbyScreenVisible">Start Game</button>
+
+<div class="form-group" style="visibility: @gameScreenVisible">
+    <label>
+        Message:
+        <input @bind="messageInput" size="50" />    
+    </label>
+</div>
+<button @onclick="Send" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
+
+<ul id="messagesList">
+    @foreach (var message in messages)
+    {
+        <li>@message</li>
+    }
+</ul>
+
+
+
+<img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="visibility:@gameScreenVisible;width:400px;height:340px;filter: blur(@game.getBlurValue()px)">
+
+<p style="visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayCorrect</p>
+<p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> Your Score: @score</p>
+
+
+
 @code {
 
     private HubConnection hubConnection;
     private List<string> users = new List<string>();
 
-
+    private List<string> messages = new List<string>();
 
     private string userInput = "";
     private string messageInput;
@@ -41,29 +69,43 @@
     private String guess = "";
     private bool disableJoin = true;
     private bool isInvalidName = true;
-    private String hideEnterCodeMsg = "visible";
-    private String hideCode = "hidden";
-    private String hideJoin = "visible";
-    private String hideInput = "visible";
-    private String hideEnterNameMsg = "visible";
-    private String hideReady = "hidden";
-    
+
+    private String enterNameScreenVisible = "visible";
+    private String lobbyScreenVisible = "hidden";
+    private String gameScreenVisible = "hidden";
+    private String scoreScreenVisible = "hidden";
+
+    private String readyButtonVisisble = "hidden";
+    private bool allReady;
+
     private static Random random = new Random();
 
+    private Game game = new Game();
+        private string displayCorrect = "Guess";
+
+    private string correctWord;
+
+    private int score = 0;
     protected override async Task OnInitializedAsync()
     {
         hubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
             .Build();
-        
+
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         QueryHelpers.ParseQuery(uri.Query).TryGetValue("gamecode", out var gamecode);
         gameCode = gamecode;
 
         hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
         {
-            var encodedMsg = $"{user}";
-            users = ChatHub.getUserList(gameCode);
+            if(message.Equals("%start game%"))
+            {               
+                StartGame();
+            }
+
+            var encodedMsg = $"{user}: {message}";
+            messages.Add(encodedMsg);
+            users = ChatHub.getUsernameList(gameCode);
             StateHasChanged();
         });
         await hubConnection.StartAsync();
@@ -80,17 +122,16 @@
     hubConnection.State == HubConnectionState.Connected;
 
     async Task<bool> JoinGroup() =>
-     await hubConnection.InvokeAsync<bool>("AddToGroup", gameCode, userInput); 
+     await hubConnection.InvokeAsync<bool>("AddToGroup", gameCode, userInput);
 
+    async Task SendGameStart() =>
+    await hubConnection.SendAsync("SendMessage", userInput, "%start game%", gameCode);
 
     async Task ReadyStatus() =>
     await hubConnection.SendAsync("ChangeStatus", gameCode, userInput);
 
-    public static string RandomString(int length)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
-    }
+    async Task Send() =>
+    await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
 
     private async Task setReadyStatus()
     {
@@ -110,6 +151,21 @@
         await hubConnection?.DisposeAsync();
 
     }
+
+    private void JoinRoom()
+    {
+        enterNameScreenVisible = "hidden";
+        lobbyScreenVisible = "visible";
+        JoinGroup();
+    }
+
+    private async void StartGame()
+    {
+        lobbyScreenVisible = "hidden";
+        gameScreenVisible = "visible";
+
+    }
+
 
     // want to be able to check if userName has been taken
     public void checkName()
