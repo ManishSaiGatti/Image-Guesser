@@ -4,19 +4,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Image_Guesser.Data;
 
 namespace Image_Guesser.Hubs
 {
+
+    //user class with fields for various data, important part is isHost and hostGame
+    //this is the game that should be sent out to all other users to play their game
+    //with, but to stay on the same game as everyone else
     public class User
     {
         private string connectionId;
         private string userName;
         private bool isReady;
+        private bool isHost;
+        private Game hostGame;
         public User(string connectionId, string userName)
         {
+
             this.connectionId = connectionId;
             this.userName = userName;
             isReady = false;
+            isHost = false;
+            hostGame = null;
         }
 
         public void changeReady()
@@ -38,6 +48,24 @@ namespace Image_Guesser.Hubs
         {
             return isReady;
         }
+        
+        public bool getIsHost()
+        {
+            return isHost;
+        }
+
+        public void setIsHost()
+        {
+            if(!isHost)
+            {
+                isHost = true;
+                hostGame = new Game();
+            }
+        }
+        public Game getHostGame()
+        {
+            return hostGame;
+        }
     }
 
     public class ChatHub : Hub
@@ -58,7 +86,9 @@ namespace Image_Guesser.Hubs
             if (!userStorage.ContainsKey(groupName))
             {
                 userStorage.Add(groupName, new ArrayList());
-                userStorage.GetValueOrDefault(groupName).Add(new User(Context.ConnectionId, userName));
+                User host = new User(Context.ConnectionId, userName);
+                host.setIsHost();
+                userStorage.GetValueOrDefault(groupName).Add(host);
                 await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
                 Console.WriteLine(userStorage.GetValueOrDefault(Context.ConnectionId));
                 await Clients.Group(groupName).SendAsync("ReceiveMessage", groupName, $"{groupName} has been created.");
@@ -147,6 +177,19 @@ namespace Image_Guesser.Hubs
                 if (user.getUserName().Equals(userName))
                 {
                     return user;
+                }
+            }
+            return null;
+        }
+
+        public Game getGameHost(String groupName)
+        {
+            ArrayList temp = userStorage.GetValueOrDefault(groupName);
+            foreach (User user in temp)
+            {
+                if (user.getIsHost())
+                {
+                    return user.getHostGame();
                 }
             }
             return null;
