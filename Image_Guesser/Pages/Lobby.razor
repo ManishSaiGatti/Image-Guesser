@@ -28,28 +28,33 @@
 
 <button class="btn btn-primary" id="startButton" @onclick="SendGameStart" disabled="@(!IsConnected)" style="visibility:@lobbyScreenVisible">Start Game</button>
 
-<div class="form-group" style="visibility: @gameScreenVisible">
-    <label>
-        Message:
-        <input @bind="messageInput" size="50" />    
-    </label>
+<div class="gameContainer">
+    <div class="gameUserInfo">
+        <div style="float:left" class="gameUsername">Username</div>
+        <p style="visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color; float: left"> @displayCorrect</p>
+        <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen; float: left"> Your Score: @score</p>
+    </div>
+    <div class="gameTimeleft">Timeleft</div>
+
+    <img class="gameImage" src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="visibility:@gameScreenVisible;width:400px;height:340px;filter: blur(@game.getBlurValue()px)">
+
+    <ul class="gameChatMessages" id="messagesList">
+        @foreach (var message in messages)
+        {
+            <li>@message</li>
+        }
+    </ul>
+
+    <div class="form-group gameChatEntry" style="visibility: @gameScreenVisible">
+        <label>
+            Message:
+            <input style="width:200px" @bind="messageInput" size="50" />    
+        </label>
+        <button @onclick="Send" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
+    </div>
+    
+
 </div>
-<button @onclick="Send" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
-
-<ul id="messagesList">
-    @foreach (var message in messages)
-    {
-        <li>@message</li>
-    }
-</ul>
-
-
-
-<img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="visibility:@gameScreenVisible;width:400px;height:340px;filter: blur(@game.getBlurValue()px)">
-
-<p style="visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayCorrect</p>
-<p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> Your Score: @score</p>
-
 
 
 @code {
