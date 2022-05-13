@@ -92,7 +92,7 @@
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         QueryHelpers.ParseQuery(uri.Query).TryGetValue("gamecode", out var gamecode);
         gameCode = gamecode;
-        game = ref ChatHub.getGameHost(gameCode).hostGame;
+        game = ChatHub.getGameHost(gameCode);
 
         hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
         {
@@ -125,16 +125,19 @@
     async Task SendGameStart() =>
     await hubConnection.SendAsync("SendMessage", userInput, "%start game%", gameCode);
 
-    async Task ReadyStatus() =>
-    await hubConnection.SendAsync("ChangeStatus", gameCode, userInput);
+    async Task ReadyStatusTrue() =>
+    await hubConnection.SendAsync("ChangeStatusTrue", gameCode, userInput);
+
+    async Task ReadyStatusFalse() =>
+    await hubConnection.SendAsync("ChangeStatusFalse", gameCode, userInput);
 
     async Task Send() =>
-    await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
+await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
 
     private async Task setReadyStatus()
     {
         //expects chathub to flip the boolean for one of the ready status field
-        await ReadyStatus();
+        await ReadyStatusTrue();
     }
 
     // check if userName has been taken
@@ -244,6 +247,7 @@
             }
             if (finishedRound)
             {
+                ReadyStatusTrue();
 
                 IncrementCount();
                 Console.WriteLine(timer + "\n");

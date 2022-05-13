@@ -18,7 +18,7 @@ namespace Image_Guesser.Hubs
         private string userName;
         private bool isReady;
         private bool isHost;
-        public Game hostGame;
+        private Game hostGame;
         public User(string connectionId, string userName)
         {
 
@@ -75,8 +75,6 @@ namespace Image_Guesser.Hubs
 
     public class ChatHub : Hub
     {
-        private static Game noGame = null;
-        
         // the key is group code, the ArrayList contains all users in the group
         private static Dictionary<String, ArrayList> userStorage = new Dictionary<String, ArrayList>();
         public async Task SendMessage(string user, string message, string groupName)
@@ -172,9 +170,13 @@ namespace Image_Guesser.Hubs
             }
             return null;
         }
-        public void ChangeStatus(string groupName, string userInput)
+        public void ChangeStatusTrue(string groupName, string userInput)
         {
             searchUsers(groupName, userInput).isReadyTrue();
+        }
+        public void ChangeStatusFalse(string groupName, string userInput)
+        {
+            searchUsers(groupName, userInput).isReadyFalse();
         }
 
         private User searchUsers(String groupName, String userName)
@@ -189,14 +191,14 @@ namespace Image_Guesser.Hubs
             return null;
         }
 
-        public static User getGameHost(String groupName)
+        public static Game getGameHost(String groupName)
         {
             ArrayList temp = userStorage.GetValueOrDefault(groupName);
             foreach (User user in temp)
             {
                 if (user.getIsHost())
                 {
-                    return user;
+                    return user.getHostGame();
                 }
             }
             return null;
