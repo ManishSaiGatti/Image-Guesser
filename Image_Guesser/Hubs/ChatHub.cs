@@ -29,9 +29,14 @@ namespace Image_Guesser.Hubs
             hostGame = null;
         }
 
-        public void changeReady()
+        public void isReadyTrue()
         {
-            isReady = !isReady;
+            isReady = true;
+        }
+
+        public void isReadyFalse()
+        {
+            isReady = false;
         }
 
         public string getConnectionId()
@@ -167,7 +172,7 @@ namespace Image_Guesser.Hubs
         }
         public void ChangeStatus(string groupName, string userInput)
         {
-            searchUsers(groupName, userInput).changeReady();
+            searchUsers(groupName, userInput).isReadyTrue();
         }
 
         private User searchUsers(String groupName, String userName)
@@ -182,7 +187,7 @@ namespace Image_Guesser.Hubs
             return null;
         }
 
-        public Game getGameHost(String groupName)
+        public static Game getGameHost(String groupName)
         {
             ArrayList temp = userStorage.GetValueOrDefault(groupName);
             foreach (User user in temp)

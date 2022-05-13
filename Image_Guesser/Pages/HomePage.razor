@@ -55,7 +55,7 @@
 
 
     async Task<bool> CheckGroup() =>
-     await hubConnection.InvokeAsync<bool>("CheckGroup", groupInput); 
+     await hubConnection.InvokeAsync<bool>("CheckGroup", groupInput);
 
     public static string RandomString(int length)
     {
@@ -80,9 +80,11 @@
         }
 
 
-     }
-    
+    }
 
+
+
+    
     public async ValueTask DisposeAsync()
     {
         await hubConnection?.DisposeAsync();
