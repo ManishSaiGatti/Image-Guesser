@@ -6,19 +6,53 @@
 
 <h1>Image Guesser</h1>
 
-<img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="width:400px;height:340px;filter: blur(@game.getBlurValue()px)">
+<div style="opacity:@visibility; float:left;">
+    <img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="width:400px;height:340px;filter: blur(@game.getBlurValue()px)">
 
-<p>Current guess: @guessVar</p>
-<p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayCorrect</p>
-<button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
-<input id="guess" @bind="guessVar">
-<p style="width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> Your Score: @score</p>
+    <p>Current guess: @guessVar</p>
+    <p style="width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayCorrect</p>
+    <button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
+    <input id="guess" @bind="guessVar">
+    <p style="width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> Your Score: @score</p>
 
-<p>@show</p>
+    <p>@show</p>
 
-<button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">start game!</button>
+    <button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">start game!</button>
 
-<button class="btn btn-primary" @onclick="startNextRound" @onload="resetTimer">Next Round</button>
+    <button class="btn btn-primary" @onclick="startNextRound" @onload="resetTimer">Next Round</button>
+
+</div>
+
+<table style="opacity:@tableVis; padding-left:300px">
+
+    @{
+        int playerCount = 5;
+        for (int i = 0; i < playerCount; i++)
+        {
+            String playerName = "player" + i;
+            <tr style="border: 2px solid">
+                <th style="border: 2px solid">@playerName</th>
+                <th style="border: 2px solid">@score</th>
+            </tr>
+        }
+    }
+    <!--
+    <tr style="border: 2px solid">
+        <th style="border: 2px solid">Header 1</th>
+        <th style="border: 2px solid">Header 2</th>
+    </tr>
+
+    <tr style="border: 2px solid">
+        <td style="border: 2px solid">Cell 1,1</td>
+        <td style="border: 2px solid">Cell 1,2</td>
+    </tr>
+
+    <tr style="border: 2px solid">
+        <td style="border: 2px solid">Cell 2,1</td>
+        <td style="border: 2px solid">Cell 2,2</td>
+    </tr>
+    -->
+</table>
 
 @code
 {   
@@ -40,6 +74,9 @@
     private string correctWord;
     private int endPoint;
     private Game game = new Game();
+
+    double visibility = 1;
+    double tableVis = 0;
 
     void getGuess()
     {
@@ -100,6 +137,15 @@
                 {
                     finishedRound = false;
                     resetTimer();
+
+                    visibility = .2;
+                    tableVis = 1;
+                    
+                    System.Threading.Thread.Sleep(3000);
+                    visibility = 1;
+                    tableVis = 0;
+
+                    resetTimer();
                     round++;
                     game.makeNewImage();
                     startNextRound();
@@ -130,7 +176,7 @@
         prev = curr;
 
         timer -= deltaTime;
-        
+
 
 
     }
