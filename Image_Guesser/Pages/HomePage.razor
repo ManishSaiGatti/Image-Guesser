@@ -73,7 +73,7 @@
         // if available, join the room
         if(await CheckGroup())
         {
-            NavigationManager.NavigateTo("/lobby?gamecode=" + codes);
+            NavigationManager.NavigateTo("/lobby?gamecode=" + groupInput);
         } else // if not avaiable, display  message
         {
             message = "this room doesn't exist";
