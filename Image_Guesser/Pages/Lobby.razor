@@ -92,7 +92,7 @@
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         QueryHelpers.ParseQuery(uri.Query).TryGetValue("gamecode", out var gamecode);
         gameCode = gamecode;
-        game = ChatHub.getGameHost(gameCode);
+        game = ref ChatHub.getGameHost(gameCode).hostGame;
 
         hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
         {
@@ -245,7 +245,6 @@
             if (finishedRound)
             {
 
-                HubConnection.sendAsync("ChangeStatus", gameCode, userInput);
                 IncrementCount();
                 Console.WriteLine(timer + "\n");
                 if (timer - endPoint < -1)
