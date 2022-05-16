@@ -82,7 +82,6 @@
     private Game game;
 
 
-
     protected override async Task OnInitializedAsync()
     {
         hubConnection = new HubConnectionBuilder()
@@ -100,7 +99,10 @@
             {
                 StartGame();
             }
-
+            if(message.Equals("new user ready"))
+            {
+                setNewImage();
+            }
             var encodedMsg = $"{user}: {message}";
             messages.Add(encodedMsg);
             users = ChatHub.getUsernameList(gameCode);
@@ -134,6 +136,19 @@
     async Task Send() =>
 await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
 
+    async Task GetNewImage() =>
+        await hubConnection.SendAsync("GetNewImage", gameCode);
+
+    async Task SetNewImage() =>
+        await hubConnection.SendAsync("SetNewImage", gameCode);
+
+    async Task<bool> allUsersReady() =>
+     await hubConnection.InvokeAsync<bool>("allUsersReady", gameCode);
+
+    private async Task<bool> usersReady()
+    {
+        return await allUsersReady();
+    }
     private async Task setReadyStatus()
     {
         //expects chathub to flip the boolean for one of the ready status field
@@ -153,6 +168,14 @@ await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
 
     }
 
+    private async void setNewImage()
+    {
+        if (await allUsersReady())
+        {
+            await SetNewImage();
+            allReady = true;
+        }
+    }
     private void JoinRoom()
     {
         enterNameScreenVisible = "hidden";
@@ -217,7 +240,6 @@ await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
             color = "darkorange";
         }
     }
-
     private void startTimer()
     {
         prev = DateTime.Now;
@@ -248,24 +270,34 @@ await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
             if (finishedRound)
             {
                 ReadyStatusTrue();
-
+                messageInput = "new user ready";
+                Send();
+                messageInput = "bruh";
                 IncrementCount();
                 Console.WriteLine(timer + "\n");
+
+
+            }
+
+
+            else
+            {
+                IncrementCount();
+                show = "Time left: " + timer;
+            }
+            if (allReady)
+            {
                 if (timer - endPoint < -1)
                 {
                     finishedRound = false;
                     resetTimer();
                     round++;
-                    game.makeNewImage();
+                    game = ChatHub.getGameHost(gameCode);
                     startNextRound();
 
                 }
-
-            }
-            else
-            {
-                IncrementCount();
-                show = "Time left: " + timer;
+                allReady = false;
+                ReadyStatusFalse();
             }
             // the following line is so
             // Blazor recognizes the state change and refreshes the UI

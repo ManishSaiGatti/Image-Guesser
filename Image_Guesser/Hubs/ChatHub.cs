@@ -82,7 +82,7 @@ namespace Image_Guesser.Hubs
             if (userStorage.ContainsKey(groupName))
             {
                 Console.WriteLine("sending message rn");
-                
+
                 await Clients.Group(groupName).SendAsync("ReceiveMessage", user, message);
             }
         }
@@ -131,7 +131,7 @@ namespace Image_Guesser.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
             Console.WriteLine(userStorage.GetValueOrDefault(Context.ConnectionId));
             await Clients.Group(groupName).SendAsync("ReceiveMessage", groupName, $"{groupName} has been created.");
-    
+
         }
 
         public async Task RemoveFromGroup(String groupName, String userName)
@@ -179,10 +179,12 @@ namespace Image_Guesser.Hubs
             searchUsers(groupName, userInput).isReadyFalse();
         }
 
+
         private User searchUsers(String groupName, String userName)
         {
             ArrayList temp = userStorage.GetValueOrDefault(groupName);
-            foreach(User user in temp) {
+            foreach (User user in temp)
+            {
                 if (user.getUserName().Equals(userName))
                 {
                     return user;
@@ -203,7 +205,23 @@ namespace Image_Guesser.Hubs
             }
             return null;
         }
+
+        public bool allUsersReady(String groupName)
+        {
+            ArrayList temp = userStorage.GetValueOrDefault(groupName);
+            foreach (User user in temp)
+            {
+                if (user.getIsReady())
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public void SetNewImage(String groupName)
+        {
+            getGameHost(groupName).makeNewImage();
+        }
     }
-    
-    
 }
