@@ -2,16 +2,17 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using Image_Guesser.Hubs;
 @inject NavigationManager NavigationManager
-<h1>HomePage</h1>
-<h5 >Enter code to join a room</h5>
+<div style="margin:0 auto; text-align:center">
+    <h1>HomePage</h1>
+    <h5 >Enter code to join a room</h5>
 
-<button class="btn btn-primary" id="guessText" @onclick="CreateRoom" disabled="@(!IsConnected)" >Create Room</button>
-<button class="btn btn-primary" id="guessText" @onclick="JoinRoom" disabled="@(!IsConnected)" >Join Room</button>
+    <button class="btn btn-primary" id="guessText" @onclick="CreateRoom" disabled="@(!IsConnected)" >Create Room</button>
+    <button class="btn btn-primary" id="guessText" @onclick="JoinRoom" disabled="@(!IsConnected)" >Join Room</button>
 
-<input id="groupBox"  @bind="groupInput">
+    <input id="groupBox"  @bind="groupInput">
 
-<p style="width: 250px"> @message</p>
-
+    <p style="width: 250px"> @message</p>
+</div>
 
 
 @code {
