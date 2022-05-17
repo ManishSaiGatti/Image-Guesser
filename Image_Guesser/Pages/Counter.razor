@@ -11,6 +11,7 @@
 <button class="btn btn-primary" id="guessText" @onclick="getGuess">Submit</button>
 <input id="guess" @bind="guessVar">
 <p style="width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> Your Score: @score</p>
+<p style="width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> @show</p>
 
 
 
@@ -20,7 +21,7 @@
 
 
 @code
-{   
+{
 
     [Parameter]
     public string testCode { get; set; }
@@ -45,7 +46,7 @@
     void getGuess()
     {
         //game.getCorrectWord().Equals(guessVar)
-        if (String.Equals(game.getCorrectWord(), guessVar, StringComparison.OrdinalIgnoreCase)&&!finishedRound)
+        if (String.Equals(game.getCorrectWord(), guessVar, StringComparison.OrdinalIgnoreCase) && !finishedRound)
         {
             displayCorrect = "You got the answer correct!";
             score += (timer * 2);
@@ -85,7 +86,7 @@
             if (timer < 1)
             {
                 endPoint = timer;
-                show = "the correct word was: " + game.getCorrectWord()+ "\nyou have run out of time!";
+                show = "the correct word was: " + game.getCorrectWord() + "\nyou have run out of time!";
                 if (!finishedRound)
                 {
                     finishedRound = true;
@@ -97,7 +98,7 @@
 
                 IncrementCount();
                 Console.WriteLine(timer + "\n");
-                if (timer-endPoint < -1)
+                if (timer - endPoint < -1)
                 {
                     finishedRound = false;
                     resetTimer();
@@ -113,9 +114,9 @@
                 IncrementCount();
                 show = "Time left: " + timer;
             }
-            // the following line is so
-            // Blazor recognizes the state change and refreshes the UI
-            InvokeAsync(() =>
+        // the following line is so
+        // Blazor recognizes the state change and refreshes the UI
+        InvokeAsync(() =>
             {
                 StateHasChanged();
             });

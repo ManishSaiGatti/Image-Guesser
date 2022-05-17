@@ -34,7 +34,7 @@
         <input @bind="messageInput" size="50" />    
     </label>
 </div>
-<button @onclick="Send" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
+<button @onclick="sendGameMessage" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
 
 <ul id="messagesList">
     @foreach (var message in messages)
@@ -47,8 +47,9 @@
 
 <img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="visibility:@gameScreenVisible;width:400px;height:340px;filter: blur(@game.getBlurValue()px)">
 
-<p style="visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayCorrect</p>
+<p style="visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayGameMessage</p>
 <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> Your Score: @score</p>
+<p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> @showTimer</p>
 
 
 
@@ -79,7 +80,7 @@
     private bool allReady;
 
     private static Random random = new Random();
-    private Game game;
+    private Game game = new Game();
 
 
     protected override async Task OnInitializedAsync()
@@ -91,7 +92,6 @@
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         QueryHelpers.ParseQuery(uri.Query).TryGetValue("gamecode", out var gamecode);
         gameCode = gamecode;
-        game = ChatHub.getGameHost(gameCode);
 
         hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
         {
@@ -99,14 +99,18 @@
             {
                 StartGame();
             }
-            if(message.Equals("new user ready"))
+            else if(message.Equals("new user ready"))
             {
                 setNewImage();
             }
-            var encodedMsg = $"{user}: {message}";
-            messages.Add(encodedMsg);
-            users = ChatHub.getUsernameList(gameCode);
-            StateHasChanged();
+            else
+            {
+                var encodedMsg = $"{user}: {message}";
+                messages.Add(encodedMsg);
+                users = ChatHub.getUsernameList(gameCode);
+                StateHasChanged();
+            }
+
         });
         await hubConnection.StartAsync();
 
@@ -127,8 +131,11 @@
     async Task SendGameStart() =>
     await hubConnection.SendAsync("SendMessage", userInput, "%start game%", gameCode);
 
+    async Task SendNewUser() =>
+    await hubConnection.SendAsync("SendMessage", userInput, "new user ready", gameCode);
+
     async Task ReadyStatusTrue() =>
-    await hubConnection.SendAsync("ChangeStatusTrue", gameCode, userInput);
+await hubConnection.SendAsync("ChangeStatusTrue", gameCode, userInput);
 
     async Task ReadyStatusFalse() =>
     await hubConnection.SendAsync("ChangeStatusFalse", gameCode, userInput);
@@ -168,6 +175,12 @@ await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
 
     }
 
+    private async void sendGameMessage()
+    {
+        await Send();
+        getGuess();
+    }
+
     private async void setNewImage()
     {
         if (await allUsersReady())
@@ -176,17 +189,20 @@ await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
             allReady = true;
         }
     }
-    private void JoinRoom()
+    private async void JoinRoom()
     {
         enterNameScreenVisible = "hidden";
         lobbyScreenVisible = "visible";
-        JoinGroup();
+        await JoinGroup();
+
     }
 
     private async void StartGame()
     {
         lobbyScreenVisible = "hidden";
         gameScreenVisible = "visible";
+        game = ChatHub.getGameHost(gameCode);
+        startTimer();
 
     }
 
@@ -208,35 +224,34 @@ await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
 
 
     private int timer = 30;
-    private string show = "Welcome to Image Guesser";
+    private string showTimer = "Welcome to Image Guesser";
     DateTime prev = DateTime.Now;
     DateTime curr = DateTime.Now;
     private bool finishedRound = false;
 
     private int round = 1;
     private int score = 0;
-    private string displayCorrect = "Guess";
-    private string guessVar = "";
+    private string displayGameMessage = "Guess";
     private int endPoint;
 
     void getGuess()
     {
-        //game.getCorrectWord().Equals(guessVar)
-        if (String.Equals(game.getCorrectWord(), guessVar, StringComparison.OrdinalIgnoreCase) && !finishedRound)
+        //game.getCorrectWord().Equals(messageInput)
+        if (String.Equals(game.getCorrectWord(), messageInput, StringComparison.OrdinalIgnoreCase) && !finishedRound)
         {
-            displayCorrect = "You got the answer correct!";
+            displayGameMessage = "You got the answer correct!";
             score += (timer * 2);
             color = "lightgreen";
             finishedRound = true;
             endPoint = timer;
-            guessVar = "";
-            show = "Next round starting...";
+            messageInput = "";
+            showTimer = "Next round starting...";
             Console.WriteLine("inGetGuess");
 
         }
         else
         {
-            displayCorrect = "You got the answer incorrect!";
+            displayGameMessage = "You got the answer incorrect!";
             color = "darkorange";
         }
     }
@@ -248,7 +263,7 @@ await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
         {
             if (round > 10)
             {
-                show = "Thanks for playing! Your score was:" + score;
+                showTimer = "Thanks for playing! Your score was:" + score;
                 InvokeAsync(() =>
                 {
                     StateHasChanged();
@@ -261,7 +276,7 @@ await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
             if (timer < 1)
             {
                 endPoint = timer;
-                show = "the correct word was: " + game.getCorrectWord() + "\nyou have run out of time!";
+                showTimer = "the correct word was: " + game.getCorrectWord() + "\nyou have run out of time!";
                 if (!finishedRound)
                 {
                     finishedRound = true;
@@ -270,11 +285,8 @@ await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
             if (finishedRound)
             {
                 ReadyStatusTrue();
-                messageInput = "new user ready";
-                Send();
-                messageInput = "bruh";
-                IncrementCount();
-                Console.WriteLine(timer + "\n");
+                SendNewUser();
+                Console.WriteLine("bruh \n");
 
 
             }
@@ -283,19 +295,18 @@ await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
             else
             {
                 IncrementCount();
-                show = "Time left: " + timer;
+                showTimer = "Time left: " + timer;
             }
             if (allReady)
             {
-                if (timer - endPoint < -1)
-                {
-                    finishedRound = false;
-                    resetTimer();
-                    round++;
-                    game = ChatHub.getGameHost(gameCode);
-                    startNextRound();
+                Console.WriteLine("bro?? \n");
+                finishedRound = false;
+                resetTimer();
+                round++;
+                game = ChatHub.getGameHost(gameCode);
+                startNextRound();
 
-                }
+                
                 allReady = false;
                 ReadyStatusFalse();
             }
@@ -332,7 +343,7 @@ await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
 
 
 
-        guessVar = "";
+        messageInput = "";
 
 
     }

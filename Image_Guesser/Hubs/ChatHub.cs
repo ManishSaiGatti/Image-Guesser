@@ -172,6 +172,7 @@ namespace Image_Guesser.Hubs
         }
         public void ChangeStatusTrue(string groupName, string userInput)
         {
+            Console.WriteLine("begging");
             searchUsers(groupName, userInput).isReadyTrue();
         }
         public void ChangeStatusFalse(string groupName, string userInput)
@@ -211,7 +212,7 @@ namespace Image_Guesser.Hubs
             ArrayList temp = userStorage.GetValueOrDefault(groupName);
             foreach (User user in temp)
             {
-                if (user.getIsReady())
+                if (!user.getIsReady())
                 {
                     return false;
                 }
