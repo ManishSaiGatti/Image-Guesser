@@ -50,7 +50,7 @@
                 Message:
                 <input style="width:200px" @bind="messageInput" size="50" />    
             </label>
-            <button @onclick="Send" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
+            <button @onclick="sendGameMessage" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
         </div>
     
 
@@ -88,8 +88,8 @@
     private Game game = new Game();
 
 
-    protected override async Task OnInitializedAsync()
-    {
+    protected override async Task OnInitializedAsync(){
+    
         hubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
             .Build();
@@ -140,13 +140,13 @@
     await hubConnection.SendAsync("SendMessage", userInput, "new user ready", gameCode);
 
     async Task ReadyStatusTrue() =>
-await hubConnection.SendAsync("ChangeStatusTrue", gameCode, userInput);
+    await hubConnection.SendAsync("ChangeStatusTrue", gameCode, userInput);
 
     async Task ReadyStatusFalse() =>
     await hubConnection.SendAsync("ChangeStatusFalse", gameCode, userInput);
 
     async Task Send() =>
-await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
+    await hubConnection.SendAsync("SendMessage", userInput, messageInput, gameCode);
 
     async Task GetNewImage() =>
         await hubConnection.SendAsync("GetNewImage", gameCode);
