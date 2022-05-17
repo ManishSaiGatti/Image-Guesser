@@ -29,9 +29,14 @@ namespace Image_Guesser.Hubs
             hostGame = null;
         }
 
-        public void changeReady()
+        public void isReadyTrue()
         {
-            isReady = !isReady;
+            isReady = true;
+        }
+
+        public void isReadyFalse()
+        {
+            isReady = false;
         }
 
         public string getConnectionId()
@@ -77,7 +82,7 @@ namespace Image_Guesser.Hubs
             if (userStorage.ContainsKey(groupName))
             {
                 Console.WriteLine("sending message rn");
-                
+
                 await Clients.Group(groupName).SendAsync("ReceiveMessage", user, message);
             }
         }
@@ -126,7 +131,7 @@ namespace Image_Guesser.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
             Console.WriteLine(userStorage.GetValueOrDefault(Context.ConnectionId));
             await Clients.Group(groupName).SendAsync("ReceiveMessage", groupName, $"{groupName} has been created.");
-    
+
         }
 
         public async Task RemoveFromGroup(String groupName, String userName)
@@ -165,15 +170,22 @@ namespace Image_Guesser.Hubs
             }
             return null;
         }
-        public void ChangeStatus(string groupName, string userInput)
+        public void ChangeStatusTrue(string groupName, string userInput)
         {
-            searchUsers(groupName, userInput).changeReady();
+            Console.WriteLine("begging");
+            searchUsers(groupName, userInput).isReadyTrue();
         }
+        public void ChangeStatusFalse(string groupName, string userInput)
+        {
+            searchUsers(groupName, userInput).isReadyFalse();
+        }
+
 
         private User searchUsers(String groupName, String userName)
         {
             ArrayList temp = userStorage.GetValueOrDefault(groupName);
-            foreach(User user in temp) {
+            foreach (User user in temp)
+            {
                 if (user.getUserName().Equals(userName))
                 {
                     return user;
@@ -182,7 +194,7 @@ namespace Image_Guesser.Hubs
             return null;
         }
 
-        public Game getGameHost(String groupName)
+        public static Game getGameHost(String groupName)
         {
             ArrayList temp = userStorage.GetValueOrDefault(groupName);
             foreach (User user in temp)
@@ -194,7 +206,23 @@ namespace Image_Guesser.Hubs
             }
             return null;
         }
+
+        public bool allUsersReady(String groupName)
+        {
+            ArrayList temp = userStorage.GetValueOrDefault(groupName);
+            foreach (User user in temp)
+            {
+                if (!user.getIsReady())
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public void SetNewImage(String groupName)
+        {
+            getGameHost(groupName).makeNewImage();
+        }
     }
-    
-    
 }
