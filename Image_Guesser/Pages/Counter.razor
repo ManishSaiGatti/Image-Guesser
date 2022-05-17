@@ -16,9 +16,18 @@
 
 <p>@show</p>
 
+<p>@closeMessage</p>
+
 <button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">start game!</button>
 
 <button class="btn btn-primary" @onclick="startNextRound" @onload="resetTimer">Next Round</button>
+
+<!--<p>@game.getCurrentImage().getCorrectName()</p>
+<p>@diffChar</p>
+
+<p>@showCorrect</p>
+<p>@showGuess</p>
+    -->
 
 @code
 {   
@@ -37,14 +46,19 @@
     private int score = 0;
     private string displayCorrect = "Guess";
     private string guessVar = "";
-    private string correctWord;
+    private string closeMessage = "";
     private int endPoint;
     private Game game = new Game();
+    //private int diffChar = 0;
+
+    private string showCorrect = "";
+    private string showGuess = "";
+
 
     void getGuess()
     {
         //game.getCorrectWord().Equals(guessVar)
-        if (String.Equals(game.getCorrectWord(), guessVar, StringComparison.OrdinalIgnoreCase)&&!finishedRound)
+        if (String.Equals(game.getCorrectWord(), guessVar, StringComparison.OrdinalIgnoreCase) && !finishedRound)
         {
             displayCorrect = "You got the answer correct!";
             score += (timer * 2);
@@ -61,6 +75,67 @@
             displayCorrect = "You got the answer incorrect!";
             color = "darkorange";
         }
+        string correct = game.getCurrentImage().getCorrectName();
+        List<char> splitCorrect = new List<char>();
+        List<char> splitGuess = new List<char>();
+
+        int longest = 0;
+        closeMessage = "";
+        if (correct.Length > guessVar.Length)
+        {
+            longest = correct.Length;
+        } else
+        {
+            longest = guessVar.Length;
+        }
+        int diffChar = 0;
+
+        for (int i = 0; i < guessVar.Length; i++)
+        {
+            splitGuess.Add(guessVar[i]);
+        }
+        //splitGuess.Sort();
+        //List<char> newSplitGuess = splitGuess.Distinct().ToList();
+        showGuess = String.Join(",", splitGuess);
+
+
+        for (int i = 0; i < correct.Length; i++)
+        {
+            splitCorrect.Add(correct[i]);
+        }
+        //splitCorrect.Sort();
+        //List<char> newSplitCorrect = splitCorrect.Distinct().ToList();
+
+        showCorrect = String.Join(",", splitCorrect);
+
+        for (int i = 0; i < splitCorrect.Count() && i < splitGuess.Count(); i++)
+        {
+            if (!splitGuess.Contains(splitCorrect.ElementAt(i)))
+            {
+                
+                diffChar++;
+            }
+
+        }
+
+        if (guessVar.Length <= correct.Length + 1 && guessVar.Length >= correct.Length - 1)
+        {
+
+
+            if ((diffChar <= 2))
+            {
+                closeMessage = "You are close!";
+            }
+
+        }
+        else
+        {
+            closeMessage = "";
+        }
+
+
+
+
     }
 
     private void startTimer()
@@ -84,7 +159,7 @@
             if (timer < 1)
             {
                 endPoint = timer;
-                show = "the correct word was: " + game.getCorrectWord()+ "\nyou have run out of time!";
+                show = "the correct word was: " + game.getCorrectWord() + "\nyou have run out of time!";
                 if (!finishedRound)
                 {
                     finishedRound = true;
@@ -96,7 +171,7 @@
 
                 IncrementCount();
                 Console.WriteLine(timer + "\n");
-                if (timer-endPoint < -1)
+                if (timer - endPoint < -1)
                 {
                     finishedRound = false;
                     resetTimer();
@@ -130,7 +205,7 @@
         prev = curr;
 
         timer -= deltaTime;
-        
+
 
 
     }
