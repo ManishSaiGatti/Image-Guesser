@@ -1,6 +1,7 @@
 ﻿@page "/counter"
 @using Image_Guesser.Data
 @using System.Threading;
+@using System;
 
 
 
@@ -22,8 +23,8 @@
 
 <button class="btn btn-primary" @onclick="startNextRound" @onload="resetTimer">Next Round</button>
 
-<!--<p>@game.getCurrentImage().getCorrectName()</p>
-<p>@diffChar</p>
+@removeNum(game.getCurrentImage().getCorrectName())
+<!--<p>@diffChar</p>
 
 <p>@showCorrect</p>
 <p>@showGuess</p>
@@ -55,10 +56,25 @@
     private string showGuess = "";
 
 
+        private String removeNum(String word)
+    {
+        word = game.getCurrentImage().getCorrectName();
+        char last = word[word.Length-1];
+        if (Char.IsDigit(last))
+        {
+            return word.Substring(0, word.Length - 1);
+        }
+        return word;
+    }
+
+
+
     void getGuess()
     {
         //game.getCorrectWord().Equals(guessVar)
-        if (String.Equals(game.getCorrectWord(), guessVar, StringComparison.OrdinalIgnoreCase) && !finishedRound)
+        string correct = game.getCurrentImage().getCorrectName();
+        correct = removeNum(correct);
+        if (String.Equals(correct, guessVar, StringComparison.OrdinalIgnoreCase) && !finishedRound)
         {
             displayCorrect = "You got the answer correct!";
             score += (timer * 2);
@@ -75,7 +91,7 @@
             displayCorrect = "You got the answer incorrect!";
             color = "darkorange";
         }
-        string correct = game.getCurrentImage().getCorrectName();
+
         List<char> splitCorrect = new List<char>();
         List<char> splitGuess = new List<char>();
 
@@ -112,7 +128,7 @@
         {
             if (!splitGuess.Contains(splitCorrect.ElementAt(i)))
             {
-                
+
                 diffChar++;
             }
 
@@ -159,7 +175,7 @@
             if (timer < 1)
             {
                 endPoint = timer;
-                show = "the correct word was: " + game.getCorrectWord() + "\nyou have run out of time!";
+                show = "the correct word was: " + removeNum(game.getCorrectWord()) + "\nyou have run out of time!";
                 if (!finishedRound)
                 {
                     finishedRound = true;
