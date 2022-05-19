@@ -6,6 +6,7 @@
 @using Image_Guesser.Data
 @inject NavigationManager NavigationManager
 
+
 <div class="gamePage">
     <div class="lobbyContainer" style="display:@lobbyDisplay; margin:0 auto; text-align:center">
         <h1>Room @gameCode</h1>
@@ -33,7 +34,6 @@
             <div style="float:left; visibility:@gameScreenVisible" class="gameUsername">Username</div>
             <p style="visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayGameMessage</p>
             <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen; float: left"> Your Score: @score</p>
-            <button class="btn btn-primary" id="sendScore" @onclick="SendScoreTest" disabled="@(!IsConnected)" style="display:@lobbyScreenVisible; margin:auto">Send Score</button>
         </div>
         <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> @showTimer</p>
 
@@ -86,8 +86,9 @@
 
     private static Random random = new Random();
     private Game game = new Game();
-
-    protected override async Task OnInitializedAsync(){
+      
+    protected override async Task OnInitializedAsync()
+    {
 
         hubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
@@ -120,9 +121,7 @@
 
         hubConnection.On<string, int>("ReceiveScore", (user, score) =>
         {
-            var encodedMsg = $"{user}: {score}";
-            messages.Add(encodedMsg);
-            users = ChatHub.getUsernameList(gameCode);
+            var receivedScore = score;
             StateHasChanged();
 
         });
@@ -142,7 +141,7 @@
     async Task SendGameStart() =>
     await hubConnection.SendAsync("SendMessage", userInput, "%start game%", gameCode);
 
-    async Task SendScoreTest() =>
+    async Task SendScore() =>
     await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
 
     async Task SendNewUser() =>
@@ -316,23 +315,20 @@
             }
             if (allReady)
             {
-                showTimer = "the correct word was: " + (timer - endPoint) + "\nnew game starting!";
-                if (timer - endPoint < -1)
-                {
-                    Console.WriteLine("bro?? \n");
-                    finishedRound = false;
-                    resetTimer();
-                    round++;
-                    game = ChatHub.getGameHost(gameCode);
-                    startNextRound();
-                    allReady = false;
-                    await ReadyStatusFalse();
-                }
+                Console.WriteLine("bro?? \n");
+                finishedRound = false;
+                resetTimer();
+                round++;
+                game = ChatHub.getGameHost(gameCode);
+                startNextRound();
 
+
+                allReady = false;
+                ReadyStatusFalse();
             }
-            // the following line is so
-            // Blazor recognizes the state change and refreshes the UI
-            await InvokeAsync(() =>
+        // the following line is so
+        // Blazor recognizes the state change and refreshes the UI
+        InvokeAsync(() =>
             {
                 StateHasChanged();
             });
