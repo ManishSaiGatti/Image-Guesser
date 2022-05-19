@@ -45,6 +45,12 @@
             var encodedMsg = $"{user}";
             StateHasChanged();
         });
+
+        hubConnection.On<string, int>("ReceiveScore", (user, score) =>
+        {
+            var encodedMsg = $"{user}";
+            StateHasChanged();
+        });
         await hubConnection.StartAsync();
 
 
@@ -85,7 +91,7 @@
 
 
 
-    
+
     public async ValueTask DisposeAsync()
     {
         await hubConnection?.DisposeAsync();

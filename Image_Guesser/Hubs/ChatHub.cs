@@ -86,6 +86,17 @@ namespace Image_Guesser.Hubs
                 await Clients.Group(groupName).SendAsync("ReceiveMessage", user, message);
             }
         }
+
+        public async Task SendScore(string user, int score, string groupName)
+        {
+            if (userStorage.ContainsKey(groupName))
+            {
+                Console.WriteLine("sending score rn");
+
+                await Clients.Group(groupName).SendAsync("ReceiveScore", user, score);
+            }
+        }
+
         public async Task<bool> AddToGroup(string groupName, string userName)
         {
             if (!userStorage.ContainsKey(groupName))

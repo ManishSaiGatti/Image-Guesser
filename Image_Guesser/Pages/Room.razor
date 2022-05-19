@@ -86,8 +86,7 @@
 
     private static Random random = new Random();
     private Game game = new Game();
-
-
+      
     protected override async Task OnInitializedAsync()
     {
 
@@ -262,7 +261,7 @@
             finishedRound = true;
             endPoint = timer;
             messageInput = "";
-            showTimer = "Next round starting...";
+            showTimer = "waiting for other players";
             Console.WriteLine("inGetGuess");
 
         }
@@ -272,16 +271,17 @@
             color = "darkorange";
         }
     }
+
     private void startTimer()
     {
         prev = DateTime.Now;
         //this is a thread that calls itself
-        var loop = new Timer(new TimerCallback(_ =>
+        var loop = new Timer(new TimerCallback(async _ =>
         {
             if (round > 10)
             {
                 showTimer = "Thanks for playing! Your score was:" + score;
-                InvokeAsync(() =>
+                await InvokeAsync(() =>
                 {
                     StateHasChanged();
                 });
@@ -289,6 +289,7 @@
             }
             int blurVal = timer - 10;
             if (blurVal < 0) blurVal = 0;
+            IncrementCount();
             game.getCurrentImage().decreaseBlur(blurVal);
             if (timer < 1)
             {
@@ -299,19 +300,17 @@
                     finishedRound = true;
                 }
             }
-            if (finishedRound)
+            if (finishedRound&&!allReady)
             {
-                ReadyStatusTrue();
-                SendNewUser();
+                await ReadyStatusTrue();
+                await SendNewUser();
                 Console.WriteLine("bruh \n");
-
 
             }
 
 
             else
             {
-                IncrementCount();
                 showTimer = "Time left: " + timer;
             }
             if (allReady)
@@ -333,7 +332,7 @@
             {
                 StateHasChanged();
             });
-        }), null, 500, 500);
+        }), null, 0, 100);
     }
     private void IncrementCount()
     {
@@ -345,7 +344,7 @@
         prev = curr;
 
         timer -= deltaTime;
-
+        Console.WriteLine(timer);
 
 
     }
