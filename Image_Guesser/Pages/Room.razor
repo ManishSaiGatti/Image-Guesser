@@ -1,4 +1,4 @@
-﻿@page "/lobby" 
+﻿@page "/lobby"
 @using Microsoft.AspNetCore.Http
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.AspNetCore.WebUtilities;
@@ -9,24 +9,24 @@
 <div class="gamePage">
     <div class="lobbyContainer" style="display:@lobbyDisplay; margin:0 auto; text-align:center">
         <h1>Room @gameCode</h1>
-            <h5 style="display: @enterNameScreenVisible" > Enter Username</h5>
-            <input id="userBox" style="display:@enterNameScreenVisible; margin: auto" @bind="userInput">
-            <button class="btn btn-primary" id="submitButton" @onclick="JoinRoom" disabled="@(!CanJoinLobby)" style="display:@enterNameScreenVisible; margin: auto">Submit</button>
+        <h5 style="display: @enterNameScreenVisible"> Enter Username</h5>
+        <input id="userBox" style="display:@enterNameScreenVisible; margin: auto" @bind="userInput">
+        <button class="btn btn-primary" id="submitButton" @onclick="JoinRoom" disabled="@(!CanJoinLobby)" style="display:@enterNameScreenVisible; margin: auto">Submit</button>
 
-            <button class="btn btn-primary" id="readyButton" @onclick="setReadyStatus" disabled="@(!IsConnected)" style="visibility:@readyButtonVisisble">set ready status</button>
+        <button class="btn btn-primary" id="readyButton" @onclick="setReadyStatus" disabled="@(!IsConnected)" style="visibility:@readyButtonVisisble">set ready status</button>
 
 
-            <h2 style="display: @lobbyScreenVisible" > Players </h2>
-            <h2 style="display: @lobbyScreenVisible" > -------------------- </h2>
+        <h2 style="display: @lobbyScreenVisible"> Players </h2>
+        <h2 style="display: @lobbyScreenVisible"> -------------------- </h2>
 
-            <ul id="userList" style="visibility:@lobbyScreenVisible; list-style: none;margin-left: -40px;">
-                @foreach (String user in users)
-                {
-                    <li>@user</li>
-                }
-            </ul>
+        <ul id="userList" style="visibility:@lobbyScreenVisible; list-style: none;margin-left: -40px;">
+            @foreach (String user in users)
+            {
+                <li>@user</li>
+            }
+        </ul>
 
-            <button class="btn btn-primary" id="startButton" @onclick="SendGameStart" disabled="@(!IsConnected)" style="display:@lobbyScreenVisible; margin:auto">Start Game</button>
+        <button class="btn btn-primary" id="startButton" @onclick="SendGameStart" disabled="@(!IsConnected)" style="display:@lobbyScreenVisible; margin:auto">Start Game</button>
     </div>
     <div class="gameContainer">
         <div class="gameUserInfo">
@@ -48,11 +48,11 @@
         <div class="form-group gameChatEntry" style="visibility: @gameScreenVisible">
             <label>
                 Message:
-                <input style="width:200px" @bind="messageInput" size="50" />    
+                <input style="width:200px" @bind="messageInput" size="50" />
             </label>
             <button @onclick="sendGameMessage" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
         </div>
-    
+
 
     </div>
 </div>
@@ -68,7 +68,6 @@
     private string messageInput;
     private string gameCode;
 
-
     private String color = "red";
     private String guess = "";
     private bool disableJoin = true;
@@ -76,7 +75,7 @@
 
     private String enterNameScreenVisible = "block";
     private String lobbyScreenVisible = "none";
-    
+
     private String gameScreenVisible = "hidden";
     private String scoreScreenVisible = "hidden";
     private String lobbyDisplay = "block";
@@ -88,8 +87,9 @@
     private Game game = new Game();
 
 
-    protected override async Task OnInitializedAsync(){
-    
+    protected override async Task OnInitializedAsync()
+    {
+
         hubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
             .Build();
@@ -100,11 +100,11 @@
 
         hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
         {
-            if(message.Equals("%start game%"))
+            if (message.Equals("%start game%"))
             {
                 StartGame();
             }
-            else if(message.Equals("new user ready"))
+            else if (message.Equals("new user ready"))
             {
                 setNewImage();
             }
@@ -117,10 +117,15 @@
             }
 
         });
+
+
+        hubConnection.On<string, int>("ReceiveScore", (user, score) =>
+        {
+            var receivedScore = score;
+            StateHasChanged();
+
+        });
         await hubConnection.StartAsync();
-
-
-
     }
 
     // checks if user is connected and if userName is not blank
@@ -135,6 +140,9 @@
 
     async Task SendGameStart() =>
     await hubConnection.SendAsync("SendMessage", userInput, "%start game%", gameCode);
+
+    async Task SendScore() =>
+    await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
 
     async Task SendNewUser() =>
     await hubConnection.SendAsync("SendMessage", userInput, "new user ready", gameCode);
@@ -217,10 +225,11 @@
     // want to be able to check if userName has been taken
     public void checkName()
     {
-        if(userInput != "")
+        if (userInput != "")
         {
             isInvalidName = false;
-        } else
+        }
+        else
         {
             isInvalidName = true;
 
@@ -313,13 +322,13 @@
                 game = ChatHub.getGameHost(gameCode);
                 startNextRound();
 
-                
+
                 allReady = false;
                 ReadyStatusFalse();
             }
-            // the following line is so
-            // Blazor recognizes the state change and refreshes the UI
-            InvokeAsync(() =>
+        // the following line is so
+        // Blazor recognizes the state change and refreshes the UI
+        InvokeAsync(() =>
             {
                 StateHasChanged();
             });
