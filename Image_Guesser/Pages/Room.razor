@@ -249,7 +249,7 @@
         game = ChatHub.getHostGame(gameCode);
         round = 1;
         startTimer();
-        rescusitateTimer();
+        //rescusitateTimer();
     }
 
 
@@ -434,6 +434,7 @@
         {
             if(counter > 1)
             {
+                Console.WriteLine("rescusitating");
                 startTimer();
                 counter = 0;
             }
@@ -445,7 +446,7 @@
             {
                 counter = 0;
             }
-            await Task.Delay(1000);
+            Thread.Sleep(2000);
         }
     }
     private void resetTimer()
