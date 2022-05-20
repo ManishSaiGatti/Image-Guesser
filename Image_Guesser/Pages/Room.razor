@@ -33,13 +33,13 @@
     <div class="gameContainer">
         <div class="gameUserInfo">
             <div style="float:left; visibility:@gameScreenVisible" class="gameUsername">@userInput</div>
-            
+            <p style="float:left; visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayGameMessage</p>
             <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen; float: right"> Your Score: @score</p>
         </div>
         <p style="visibility:@gameScreenVisible;width: 400px"> @showTimer</p>
 
         <img class="gameImage" src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="visibility:@gameScreenVisible;width:400px;height:340px;filter: blur(@game.getBlurValue()px); margin: auto">
-        <p style="float:left; visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayGameMessage</p>
+        
         <ul class="gameChatMessages" style="visibility: @gameScreenVisible; height: 100%; overflow-y:scroll" id="messagesList">
             @foreach (var message in messages)
             {
@@ -201,11 +201,6 @@
     {
         if (await allUsersReady())
         {
-<<<<<<< HEAD
-=======
-            await SetNewImage();
-            messages.Clear();
->>>>>>> 5d9dcdb54049b2f6e4e59c5885d4057583a4bcb7
             allReady = true;
         }
     }
@@ -352,31 +347,11 @@
                 }
             }
             await testEnd();
-            /*if(!allReady && !finishedRound)
-            {
-                showTimer = "Time left: " + timer;
-<<<<<<< HEAD
-            }*/
+            
+
+            // the following line is so
+            // Blazor recognizes the state change and refreshes the UI
             await InvokeAsync(() =>
-=======
-            }
-            if (allReady)
-            {
-                Console.WriteLine("bro?? \n");
-                finishedRound = false;
-                resetTimer();
-                round++;
-                game = ChatHub.getGameHost(gameCode);
-                startNextRound();
-
-
-                allReady = false;
-                ReadyStatusFalse();
-            }
-        // the following line is so
-        // Blazor recognizes the state change and refreshes the UI
-        InvokeAsync(() =>
->>>>>>> 5d9dcdb54049b2f6e4e59c5885d4057583a4bcb7
             {
                 StateHasChanged();
             });
