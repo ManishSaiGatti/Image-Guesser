@@ -58,6 +58,20 @@
     </div>
 </div>
 
+<table style="opacity:@tableVis;">
+    @{
+        int playerCount = 5;
+        for (int i = 0; i < playerCount; i++)
+        {
+            String playerName = "player" + i;
+            <tr style="border: 2px solid">
+                <th style="border: 2px solid">@playerName</th>
+                <th style="border: 2px solid">@score</th>
+            </tr>
+        }
+    }
+</table>
+
 @code {
 
     private HubConnection hubConnection;
@@ -86,7 +100,10 @@
 
     private static Random random = new Random();
     private Game game = new Game();
-      
+
+    double visibility = 1;
+    double tableVis = 1;
+
     protected override async Task OnInitializedAsync()
     {
 
@@ -317,6 +334,15 @@
             {
                 Console.WriteLine("bro?? \n");
                 finishedRound = false;
+                /*resetTimer();
+
+                visibility = .2;
+                tableVis = 1;
+
+                System.Threading.Thread.Sleep(3000);
+                visibility = 1;
+                tableVis = 0;*/
+
                 resetTimer();
                 round++;
                 game = ChatHub.getGameHost(gameCode);
@@ -326,9 +352,9 @@
                 allReady = false;
                 ReadyStatusFalse();
             }
-        // the following line is so
-        // Blazor recognizes the state change and refreshes the UI
-        InvokeAsync(() =>
+            // the following line is so
+            // Blazor recognizes the state change and refreshes the UI
+            InvokeAsync(() =>
             {
                 StateHasChanged();
             });
