@@ -8,11 +8,12 @@
 
 
 <div class="gamePage">
-    <div class="lobbyContainer" style="display:@lobbyDisplay; margin:0 auto; text-align:center">
-        <h1>Room @gameCode</h1>
+    <h1 style="text-align:center; display: @lobbyDisplay"> Room @gameCode </h1>
+    <div class="lobbyContainer" style="display:@lobbyDisplay; margin:0 auto; text-align:center; transform: translate(0, 15vh);">
+        
         <h5 style="display: @enterNameScreenVisible"> Enter Username</h5>
         <input id="userBox" style="display:@enterNameScreenVisible; margin: auto" @bind="userInput">
-        <button class="btn btn-primary" id="submitButton" @onclick="JoinRoom" disabled="@(!CanJoinLobby)" style="display:@enterNameScreenVisible; margin: auto">Submit</button>
+        <button class="btn btn-primary" id="submitButton" @onclick="JoinRoom" disabled="@(!CanJoinLobby)" style="display:@enterNameScreenVisible; margin: auto; transform: translateY(5px);">Submit</button>
 
         <button class="btn btn-primary" id="readyButton" @onclick="setReadyStatus" disabled="@(!IsConnected)" style="visibility:@readyButtonVisisble">set ready status</button>
 
@@ -27,19 +28,19 @@
             }
         </ul>
 
-        <button class="btn btn-primary" id="startButton" @onclick="SendGameStart" disabled="@(!IsConnected)" style="display:@lobbyScreenVisible; margin:auto">Start Game</button>
+        <button class="btn btn-primary" id="startButton" @onclick="SendGameStart" disabled="@(!IsConnected)" style="display:@lobbyScreenVisible; margin:auto; transform: translateY(5px);">Start Game</button>
     </div>
     <div class="gameContainer">
         <div class="gameUserInfo">
-            <div style="float:left; visibility:@gameScreenVisible" class="gameUsername">Username</div>
-            <p style="visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayGameMessage</p>
-            <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen; float: left"> Your Score: @score</p>
+            <div style="float:left; visibility:@gameScreenVisible" class="gameUsername">@userInput</div>
+            <p style="float:left; visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayGameMessage</p>
+            <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen; float: right"> Your Score: @score</p>
         </div>
-        <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> @showTimer</p>
+        <p style="visibility:@gameScreenVisible;width: 400px"> @showTimer</p>
 
-        <img class="gameImage" src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="visibility:@gameScreenVisible;width:400px;height:340px;filter: blur(@game.getBlurValue()px)">
-
-        <ul class="gameChatMessages" style="visibility: @gameScreenVisible" id="messagesList">
+        <img class="gameImage" src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="visibility:@gameScreenVisible;width:400px;height:340px;filter: blur(@game.getBlurValue()px); margin: auto">
+        
+        <ul class="gameChatMessages" style="visibility: @gameScreenVisible; height: 100%; overflow-y:scroll" id="messagesList">
             @foreach (var message in messages)
             {
                 <li>@message</li>
@@ -51,7 +52,7 @@
                 Message:
                 <input style="width:200px" @bind="messageInput" size="50" />
             </label>
-            <button @onclick="sendGameMessage" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
+            <button @onclick="getGuess" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
         </div>
 
 
@@ -101,8 +102,10 @@
     private static Random random = new Random();
     private Game game = new Game();
 
+
     double visibility = 1;
     double tableVis = 1;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -207,16 +210,18 @@
 
     private async void sendGameMessage()
     {
+
         await Send();
         getGuess();
+        messageInput = "";
     }
 
     private async void setNewImage()
     {
         if (await allUsersReady())
         {
-            await SetNewImage();
             allReady = true;
+            messages.Clear();
         }
     }
     private async void JoinRoom()
@@ -235,7 +240,7 @@
         lobbyDisplay = "none";
         game = ChatHub.getGameHost(gameCode);
         startTimer();
-
+        testEnd();
     }
 
 
@@ -261,6 +266,7 @@
     DateTime prev = DateTime.Now;
     DateTime curr = DateTime.Now;
     private bool finishedRound = false;
+    private bool prevFinishedRound = false;
 
     private int round = 1;
     private int score = 0;
@@ -289,34 +295,78 @@
         }
     }
 
-    private void startTimer()
+    private async Task testEnd()
+    {
+        if (round > 10)
+        {
+            showTimer = "Thanks for playing! Your score was:" + score;
+            await InvokeAsync(() =>
+            {
+                StateHasChanged();
+            });
+            return;
+
+        }
+
+        if ((finishedRound && !allReady))//&&!prevFinishedRound)
+        {
+            await ReadyStatusTrue();
+            Console.WriteLine("bruh1 \n");
+
+            await SendNewUser();
+            Console.WriteLine("bruh \n");
+
+
+        }
+
+        else
+        {
+            showTimer = "Time left: " + timer;
+        }
+        prevFinishedRound = finishedRound;
+        if (allReady)
+        {
+            showTimer = "the correct word was: " + (timer - endPoint) + "\nnew game starting!";
+            if (timer - endPoint < -1)
+            {
+                Console.WriteLine("bro?? \n");
+                finishedRound = false;
+                resetTimer();
+                round++;
+                game = ChatHub.getGameHost(gameCode);
+                startNextRound();
+                await SetNewImage();
+                allReady = false;
+                await ReadyStatusFalse();
+            }
+
+        }
+    }
+    private async void startTimer()
     {
         prev = DateTime.Now;
         //this is a thread that calls itself
+
         var loop = new Timer(new TimerCallback(async _ =>
         {
-            if (round > 10)
-            {
-                showTimer = "Thanks for playing! Your score was:" + score;
-                await InvokeAsync(() =>
-                {
-                    StateHasChanged();
-                });
-                return;
-            }
+
             int blurVal = timer - 10;
             if (blurVal < 0) blurVal = 0;
             IncrementCount();
+            Console.WriteLine(timer + ", " + endPoint);
+
             game.getCurrentImage().decreaseBlur(blurVal);
             if (timer < 1)
             {
-                endPoint = timer;
+
                 showTimer = "the correct word was: " + game.getCorrectWord() + "\nyou have run out of time!";
                 if (!finishedRound)
                 {
+                    endPoint = timer;
                     finishedRound = true;
                 }
             }
+
             if (finishedRound&&!allReady)
             {
                 await ReadyStatusTrue();
@@ -355,10 +405,19 @@
             // the following line is so
             // Blazor recognizes the state change and refreshes the UI
             InvokeAsync(() =>
+
+            await testEnd();
+            
+
+            // the following line is so
+            // Blazor recognizes the state change and refreshes the UI
+            await InvokeAsync(() =>
+
             {
                 StateHasChanged();
             });
         }), null, 0, 100);
+
     }
     private void IncrementCount()
     {
@@ -380,7 +439,7 @@
         timer = 30;
     }
 
-    private void startNextRound()
+    private  void startNextRound()
     {
 
 
