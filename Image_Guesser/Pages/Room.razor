@@ -38,6 +38,19 @@
         </div>
         <p style="visibility:@gameScreenVisible;width: 400px"> @showTimer</p>
 
+        <table class="scoreList" style="opacity:@tableVis; display:inline-block; float:left;">
+        @{
+            int playerCount = 5;
+            for (int i = 0; i < playerCount; i++)
+            {
+                String playerName = "player" + i;
+                <tr style="border: 2px solid">
+                    <th style="border: 2px solid">@playerName</th>
+                    <th style="border: 2px solid">@score</th>
+                </tr>
+            }
+        }
+        </table>
         <img class="gameImage" src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="visibility:@gameScreenVisible;width:400px;height:340px;filter: blur(@game.getBlurValue()px); margin: auto">
         
         <ul class="gameChatMessages" style="visibility: @gameScreenVisible; height: 100%; overflow-y:scroll" id="messagesList">
@@ -59,19 +72,7 @@
     </div>
 </div>
 
-<table style="opacity:@tableVis; display:inline-block; float:left;">
-    @{
-        int playerCount = 5;
-        for (int i = 0; i < playerCount; i++)
-        {
-            String playerName = "player" + i;
-            <tr style="border: 2px solid">
-                <th style="border: 2px solid">@playerName</th>
-                <th style="border: 2px solid">@score</th>
-            </tr>
-        }
-    }
-</table>
+
 
 @code {
 
