@@ -19,6 +19,10 @@ namespace Image_Guesser.Hubs
         private bool isReady;
         private bool isHost;
         private Game hostGame;
+        private int score;
+
+        public int timer;
+
         public User(string connectionId, string userName)
         {
 
@@ -27,6 +31,11 @@ namespace Image_Guesser.Hubs
             isReady = false;
             isHost = false;
             hostGame = null;
+
+            score = 0;
+
+            timer = 0;
+
         }
 
         public void isReadyTrue()
@@ -54,6 +63,15 @@ namespace Image_Guesser.Hubs
             return isReady;
         }
         
+        public int getScore()
+        {
+            return score;
+        }
+        
+        public void setScore(int score)
+        {
+            this.score = score;
+        }
         public bool getIsHost()
         {
             return isHost;
@@ -70,6 +88,11 @@ namespace Image_Guesser.Hubs
         public Game getHostGame()
         {
             return hostGame;
+        }
+
+        public void setTimer(int input)
+        {
+            timer = input;
         }
     }
 
@@ -92,8 +115,8 @@ namespace Image_Guesser.Hubs
             if (userStorage.ContainsKey(groupName))
             {
                 Console.WriteLine("sending score rn");
-
-                await Clients.Group(groupName).SendAsync("ReceiveScore", user, score);
+                searchUsers(groupName, user).setScore(score);
+                await SendMessage(user, "sending scores", groupName);
             }
         }
 
@@ -169,6 +192,21 @@ namespace Image_Guesser.Hubs
             }
             return null;
         }
+        public static List<int> getScoresList(String groupName)
+        {
+            
+            List<int> temp = new List<int>();
+            if (userStorage.ContainsKey(groupName))
+            {
+
+                foreach (User user in userStorage.GetValueOrDefault(groupName))
+                {
+                    temp.Add(user.getScore());
+                }
+                return temp;
+            }
+            return null;
+        }
 
         public static List<User> getUserList(String groupName)
         {
@@ -205,7 +243,19 @@ namespace Image_Guesser.Hubs
             return null;
         }
 
-        public static Game getGameHost(String groupName)
+        public static User getGameHost(String groupName)
+        {
+            ArrayList temp = userStorage.GetValueOrDefault(groupName);
+            foreach (User user in temp)
+            {
+                if (user.getIsHost())
+                {
+                    return user;
+                }
+            }
+            return null;
+        }
+        public static Game getHostGame(String groupName)
         {
             ArrayList temp = userStorage.GetValueOrDefault(groupName);
             foreach (User user in temp)
@@ -233,7 +283,7 @@ namespace Image_Guesser.Hubs
 
         public void SetNewImage(String groupName)
         {
-            getGameHost(groupName).makeNewImage();
+            getHostGame(groupName).makeNewImage();
         }
     }
 }
