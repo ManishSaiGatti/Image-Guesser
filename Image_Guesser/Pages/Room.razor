@@ -38,7 +38,7 @@
         </div>
         <p style="visibility:@gameScreenVisible;width: 400px"> @showTimer</p>
 
-        <table class="scoreList" style="opacity:@tableVis; display:inline-block; float:left;">
+        <table class="scoreList" style="opacity:@tableVis; display: @scoreListVisible; float:left;">
         @{
 
             for (int i = 0; i < users.Count; i++)
@@ -95,6 +95,7 @@
     private String enterNameScreenVisible = "block";
     private String lobbyScreenVisible = "none";
 
+    private String scoreListVisible = "none";
     private String gameScreenVisible = "hidden";
     private String scoreScreenVisible = "hidden";
     private String lobbyDisplay = "block";
@@ -246,6 +247,7 @@
         lobbyScreenVisible = "hidden";
         gameScreenVisible = "visible";
         lobbyDisplay = "none";
+        scoreListVisible = "block";
         game = ChatHub.getHostGame(gameCode);
         round = 1;
         startTimer();
