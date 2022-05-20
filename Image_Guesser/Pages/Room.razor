@@ -63,7 +63,7 @@
 
         <div class="form-group gameChatEntry" style="visibility: @gameScreenVisible">
             <label>
-                Message:
+                Guess:
                 <input style="width:200px" @bind="messageInput" size="50" />
             </label>
             <button @onclick="getGuess" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
