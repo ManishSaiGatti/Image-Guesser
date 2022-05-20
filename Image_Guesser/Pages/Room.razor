@@ -221,6 +221,8 @@
         if (await allUsersReady())
         {
             allReady = true;
+            endPoint = timer;
+
             messages.Clear();
         }
     }
@@ -231,6 +233,12 @@
         lobbyDisplay = "block";
         await JoinGroup();
 
+        if (userInput.Equals(ChatHub.getGameHost(gameCode).getUserName()))
+        {
+            isHost = true;
+            timer = TIMER_MAX;
+        }
+
     }
 
     private async void StartGame()
@@ -238,9 +246,10 @@
         lobbyScreenVisible = "hidden";
         gameScreenVisible = "visible";
         lobbyDisplay = "none";
-        game = ChatHub.getGameHost(gameCode);
+        game = ChatHub.getHostGame(gameCode);
+        round = 1;
         startTimer();
-        testEnd();
+        rescusitateTimer();
     }
 
 
@@ -260,8 +269,8 @@
     }//game page code stuff
 
 
-
-    private int timer = 30;
+    private const int TIMER_MAX = 30;
+    private int timer;
     private string showTimer = "Welcome to Image Guesser";
     DateTime prev = DateTime.Now;
     DateTime curr = DateTime.Now;
@@ -282,7 +291,6 @@
             score += (timer * 2);
             color = "lightgreen";
             finishedRound = true;
-            endPoint = timer;
             messageInput = "";
             showTimer = "waiting for other players";
             Console.WriteLine("inGetGuess");
@@ -295,6 +303,7 @@
         }
     }
 
+    bool isHost = false;
     private async Task testEnd()
     {
         if (round > 10)
@@ -326,12 +335,19 @@
         prevFinishedRound = finishedRound;
         if (allReady)
         {
-            showTimer = "the correct word was: " + (timer - endPoint) + "\nnew game starting!";
+            showTimer = "the correct word was: " + (game.getCorrectWord()) + "\nnew game starting!";
             if (timer - endPoint < -1)
             {
                 Console.WriteLine("bro?? \n");
                 finishedRound = false;
-                /*resetTimer();
+                if (isHost)
+                {
+                    resetTimer();
+                    ChatHub.getGameHost(gameCode).timer = this.timer;
+                    await SetNewImage();
+                }
+
+                /*
 
                 visibility = .2;
                 tableVis = 1;
@@ -340,11 +356,9 @@
                 visibility = 1;
                 tableVis = 0;*/
 
-                resetTimer();
                 round++;
-                game = ChatHub.getGameHost(gameCode);
+                game = ChatHub.getHostGame(gameCode);
                 startNextRound();
-                await SetNewImage();
                 allReady = false;
                 await ReadyStatusFalse();
             }
@@ -361,21 +375,31 @@
 
             int blurVal = timer - 10;
             if (blurVal < 0) blurVal = 0;
-            IncrementCount();
+            await testEnd();
+            game.getCurrentImage().decreaseBlur(blurVal);
+
+            if (isHost)
+            {
+                IncrementCount();
+                ChatHub.getGameHost(gameCode).setTimer(timer);
+
+            }
+
+            else
+            {
+                timer = ChatHub.getGameHost(gameCode).timer;
+            }
             Console.WriteLine(timer + ", " + endPoint);
 
-            game.getCurrentImage().decreaseBlur(blurVal);
             if (timer < 1)
             {
 
-                showTimer = "the correct word was: " + game.getCorrectWord() + "\nyou have run out of time!";
                 if (!finishedRound)
                 {
-                    endPoint = timer;
                     finishedRound = true;
                 }
             }
-            await testEnd();
+
 
 
             // the following line is so
@@ -402,9 +426,31 @@
 
     }
 
+    private async void rescusitateTimer()
+    {
+        int prevTime = timer;
+        int counter = 0;
+        while (true)
+        {
+            if(counter > 1)
+            {
+                startTimer();
+                counter = 0;
+            }
+            if (prevTime == timer)
+            {
+                counter++;
+            }
+            else
+            {
+                counter = 0;
+            }
+            await Task.Delay(1000);
+        }
+    }
     private void resetTimer()
     {
-        timer = 30;
+        timer = TIMER_MAX;
     }
 
     private  void startNextRound()
