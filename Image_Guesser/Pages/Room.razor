@@ -191,7 +191,7 @@
 
     private async void sendGameMessage()
     {
-        
+
         await Send();
         getGuess();
         messageInput = "";
@@ -202,6 +202,7 @@
         if (await allUsersReady())
         {
             allReady = true;
+            messages.Clear();
         }
     }
     private async void JoinRoom()
