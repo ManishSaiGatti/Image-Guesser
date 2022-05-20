@@ -34,6 +34,7 @@
         <div class="gameUserInfo">
             <div style="float:left; visibility:@gameScreenVisible" class="gameUsername">@userInput</div>
             <p style="float:left; visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color; transform:translate(28vw)"> @displayGameMessage</p>
+            <p>@closeMessage</p>
             <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen; float: right"> Your Score: @score</p>
         </div>
         <p style="visibility:@gameScreenVisible;width: 400px"> @showTimer</p>
@@ -72,6 +73,7 @@
 
     </div>
 </div>
+
 
 
 
@@ -284,10 +286,28 @@
     private string displayGameMessage = "Guess";
     private int endPoint;
 
+
+    private String closeMessage = "";
+    private String showCorrect = "";
+    private String showGuess = "";
+
+    private String removeNum(String word)
+    {
+        word = game.getCurrentImage().getCorrectName();
+        char last = word[word.Length - 1];
+        if (Char.IsDigit(last))
+        {
+            return word.Substring(0, word.Length - 1);
+        }
+        return word;
+    }
+
     async void getGuess()
     {
         //game.getCorrectWord().Equals(messageInput)
-        if (String.Equals(game.getCorrectWord(), messageInput, StringComparison.OrdinalIgnoreCase) && !finishedRound)
+        string correct = game.getCurrentImage().getCorrectName();
+        correct = removeNum(correct);
+        if (String.Equals(correct, messageInput, StringComparison.OrdinalIgnoreCase) && !finishedRound)
         {
             displayGameMessage = "You got the answer correct!";
             score += (timer * 2);
@@ -302,6 +322,54 @@
         {
             displayGameMessage = "You got the answer incorrect!";
             color = "darkorange";
+        }
+        List<char> splitCorrect = new List<char>();
+        List<char> splitGuess = new List<char>();
+
+        int longest = 0;
+        closeMessage = "";
+        if (correct.Length > messageInput.Length)
+        {
+            longest = correct.Length;
+        }
+        else
+        {
+            longest = messageInput.Length;
+        }
+        int diffChar = 0;
+
+        for (int i = 0; i < messageInput.Length; i++)
+        {
+            splitGuess.Add(messageInput[i]);
+        }
+        showGuess = String.Join(",", splitGuess);
+
+
+        for (int i = 0; i < correct.Length; i++)
+        {
+            splitCorrect.Add(correct[i]);
+        }
+
+        showCorrect = String.Join(",", splitCorrect);
+
+        for (int i = 0; i < splitCorrect.Count() && i < splitGuess.Count(); i++)
+        {
+            if (!splitGuess.Contains(splitCorrect.ElementAt(i)))
+            {
+                diffChar++;
+            }
+        }
+
+        if (messageInput.Length <= correct.Length + 1 && messageInput.Length >= correct.Length - 1)
+        {
+            if ((diffChar <= 2))
+            {
+                closeMessage = "You are close!";
+            }
+        }
+        else
+        {
+            closeMessage = "";
         }
     }
 
