@@ -19,6 +19,7 @@ namespace Image_Guesser.Hubs
         private bool isReady;
         private bool isHost;
         private Game hostGame;
+        public int timer;
         public User(string connectionId, string userName)
         {
 
@@ -27,6 +28,7 @@ namespace Image_Guesser.Hubs
             isReady = false;
             isHost = false;
             hostGame = null;
+            timer = 0;
         }
 
         public void isReadyTrue()
@@ -70,6 +72,11 @@ namespace Image_Guesser.Hubs
         public Game getHostGame()
         {
             return hostGame;
+        }
+
+        public void setTimer(int input)
+        {
+            timer = input;
         }
     }
 
@@ -205,7 +212,19 @@ namespace Image_Guesser.Hubs
             return null;
         }
 
-        public static Game getGameHost(String groupName)
+        public static User getGameHost(String groupName)
+        {
+            ArrayList temp = userStorage.GetValueOrDefault(groupName);
+            foreach (User user in temp)
+            {
+                if (user.getIsHost())
+                {
+                    return user;
+                }
+            }
+            return null;
+        }
+        public static Game getHostGame(String groupName)
         {
             ArrayList temp = userStorage.GetValueOrDefault(groupName);
             foreach (User user in temp)
@@ -233,7 +252,7 @@ namespace Image_Guesser.Hubs
 
         public void SetNewImage(String groupName)
         {
-            getGameHost(groupName).makeNewImage();
+            getHostGame(groupName).makeNewImage();
         }
     }
 }
