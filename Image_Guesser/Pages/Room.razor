@@ -50,7 +50,7 @@
                 Message:
                 <input style="width:200px" @bind="messageInput" size="50" />    
             </label>
-            <button @onclick="sendGameMessage" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
+            <button @onclick="getGuess" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
         </div>
     
 
@@ -190,7 +190,6 @@
     {
         if (await allUsersReady())
         {
-            await SetNewImage();
             allReady = true;
         }
     }
@@ -210,7 +209,7 @@
         lobbyDisplay = "none";
         game = ChatHub.getGameHost(gameCode);
         startTimer();
-
+        testEnd();
     }
 
 
@@ -235,6 +234,7 @@
     DateTime prev = DateTime.Now;
     DateTime curr = DateTime.Now;
     private bool finishedRound = false;
+    private bool prevFinishedRound = false;
 
     private int round = 1;
     private int score = 0;
@@ -263,70 +263,88 @@
         }
     }
 
-    private void startTimer()
+    private async Task testEnd()
+    {
+        if (round > 10)
+        {
+            showTimer = "Thanks for playing! Your score was:" + score;
+            await InvokeAsync(() =>
+            {
+                StateHasChanged();
+            });
+            return;
+
+        }
+
+        if ((finishedRound && !allReady))//&&!prevFinishedRound)
+        {
+            await ReadyStatusTrue();
+            Console.WriteLine("bruh1 \n");
+
+            await SendNewUser();
+            Console.WriteLine("bruh \n");
+
+
+        }
+
+        else
+        {
+            showTimer = "Time left: " + timer;
+        }
+        prevFinishedRound = finishedRound;
+        if (allReady)
+        {
+            showTimer = "the correct word was: " + (timer - endPoint) + "\nnew game starting!";
+            if (timer - endPoint < -1)
+            {
+                Console.WriteLine("bro?? \n");
+                finishedRound = false;
+                resetTimer();
+                round++;
+                game = ChatHub.getGameHost(gameCode);
+                startNextRound();
+                await SetNewImage();
+                allReady = false;
+                await ReadyStatusFalse();
+            }
+
+        }
+    }
+    private async void startTimer()
     {
         prev = DateTime.Now;
         //this is a thread that calls itself
+
         var loop = new Timer(new TimerCallback(async _ =>
         {
-            if (round > 10)
-            {
-                showTimer = "Thanks for playing! Your score was:" + score;
-                await InvokeAsync(() =>
-                {
-                    StateHasChanged();
-                });
-                return;
-            }
+
             int blurVal = timer - 10;
             if (blurVal < 0) blurVal = 0;
             IncrementCount();
+            Console.WriteLine(timer + ", " + endPoint);
+
             game.getCurrentImage().decreaseBlur(blurVal);
             if (timer < 1)
             {
-                endPoint = timer;
+
                 showTimer = "the correct word was: " + game.getCorrectWord() + "\nyou have run out of time!";
                 if (!finishedRound)
                 {
+                    endPoint = timer;
                     finishedRound = true;
                 }
             }
-            if (finishedRound&&!allReady)
-            {
-                await ReadyStatusTrue();
-                await SendNewUser();
-                Console.WriteLine("bruh \n");
-
-            }
-
-
-            else
+            await testEnd();
+            /*if(!allReady && !finishedRound)
             {
                 showTimer = "Time left: " + timer;
-            }
-            if (allReady)
-            {
-                showTimer = "the correct word was: " + (timer - endPoint) + "\nnew game starting!";
-                if (timer - endPoint < -1)
-                {
-                    Console.WriteLine("bro?? \n");
-                    finishedRound = false;
-                    resetTimer();
-                    round++;
-                    game = ChatHub.getGameHost(gameCode);
-                    startNextRound();
-                    allReady = false;
-                    await ReadyStatusFalse();
-                }
-
-            }
-            // the following line is so
-            // Blazor recognizes the state change and refreshes the UI
+            }*/
             await InvokeAsync(() =>
             {
                 StateHasChanged();
             });
         }), null, 0, 100);
+
     }
     private void IncrementCount()
     {
@@ -348,7 +366,7 @@
         timer = 30;
     }
 
-    private void startNextRound()
+    private  void startNextRound()
     {
 
 
