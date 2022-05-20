@@ -4,6 +4,7 @@
 
 <h1>Image Guesser</h1>
 
+<div style="opacity:@visibility;">
 <img src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="width:400px;height:340px;filter: blur(@game.getBlurValue()px)">
 
 <p>Current guess: @guessVar</p>
@@ -18,6 +19,23 @@
 <button class="btn btn-primary" @onclick="startTimer" @onload="resetTimer">start game!</button>
 
 <button class="btn btn-primary" @onclick="startNextRound" @onload="resetTimer">Next Round</button>
+</div>
+
+
+
+<table style="opacity:@tableVis;">
+    @{
+        int playerCount = 5;
+        for (int i = 0; i < playerCount; i++)
+        {
+            String playerName = "player" + i;
+            <tr style="border: 2px solid">
+                <th style="border: 2px solid">@playerName</th>
+                <th style="border: 2px solid">@score</th>
+            </tr>
+        }
+    }
+</table>
 
 
 @code
@@ -42,6 +60,9 @@
     private string correctWord;
     private int endPoint;
     private Game game = new Game();
+
+    double visibility = 1;
+    double tableVis = 1;
 
     void getGuess()
     {
@@ -101,6 +122,15 @@
                 if (timer - endPoint < -1)
                 {
                     finishedRound = false;
+                    resetTimer();
+
+                    visibility = .2;
+                    tableVis = 1;
+
+                    System.Threading.Thread.Sleep(3000);
+                    visibility = 1;
+                    tableVis = 0;
+
                     resetTimer();
                     round++;
                     game.makeNewImage();
