@@ -40,10 +40,11 @@
 
         <table class="scoreList" style="opacity:@tableVis; display:inline-block; float:left;">
         @{
-            int playerCount = 5;
-            for (int i = 0; i < playerCount; i++)
+
+            for (int i = 0; i < users.Count; i++)
             {
-                String playerName = "player" + i;
+                String playerName = users[i];
+                int score = scores[i];
                 <tr style="border: 2px solid">
                     <th style="border: 2px solid">@playerName</th>
                     <th style="border: 2px solid">@score</th>
@@ -78,6 +79,7 @@
 
     private HubConnection hubConnection;
     private List<string> users = new List<string>();
+    private List<int> scores = new List<int>();
 
     private List<string> messages = new List<string>();
 
@@ -126,24 +128,23 @@
             else if (message.Equals("new user ready"))
             {
                 setNewImage();
+            } 
+            else if(message.Equals("sending scores"))
+            {
+                scores = ChatHub.getScoresList(gameCode);
             }
             else
             {
                 var encodedMsg = $"{user}: {message}";
                 messages.Add(encodedMsg);
                 users = ChatHub.getUsernameList(gameCode);
+                scores = ChatHub.getScoresList(gameCode);
                 StateHasChanged();
             }
 
         });
 
 
-        hubConnection.On<string, int>("ReceiveScore", (user, score) =>
-        {
-            var receivedScore = score;
-            StateHasChanged();
-
-        });
         await hubConnection.StartAsync();
     }
 
@@ -272,7 +273,7 @@
     private string displayGameMessage = "Guess";
     private int endPoint;
 
-    void getGuess()
+    async void getGuess()
     {
         //game.getCorrectWord().Equals(messageInput)
         if (String.Equals(game.getCorrectWord(), messageInput, StringComparison.OrdinalIgnoreCase) && !finishedRound)
@@ -285,7 +286,7 @@
             messageInput = "";
             showTimer = "waiting for other players";
             Console.WriteLine("inGetGuess");
-
+            await SendScore();
         }
         else
         {

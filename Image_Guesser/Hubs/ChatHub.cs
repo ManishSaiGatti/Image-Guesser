@@ -19,6 +19,7 @@ namespace Image_Guesser.Hubs
         private bool isReady;
         private bool isHost;
         private Game hostGame;
+        private int score;
         public User(string connectionId, string userName)
         {
 
@@ -27,6 +28,7 @@ namespace Image_Guesser.Hubs
             isReady = false;
             isHost = false;
             hostGame = null;
+            score = 0;
         }
 
         public void isReadyTrue()
@@ -54,6 +56,15 @@ namespace Image_Guesser.Hubs
             return isReady;
         }
         
+        public int getScore()
+        {
+            return score;
+        }
+        
+        public void setScore(int score)
+        {
+            this.score = score;
+        }
         public bool getIsHost()
         {
             return isHost;
@@ -92,8 +103,8 @@ namespace Image_Guesser.Hubs
             if (userStorage.ContainsKey(groupName))
             {
                 Console.WriteLine("sending score rn");
-
-                await Clients.Group(groupName).SendAsync("ReceiveScore", user, score);
+                searchUsers(groupName, user).setScore(score);
+                await SendMessage(user, "sending scores", groupName);
             }
         }
 
@@ -164,6 +175,21 @@ namespace Image_Guesser.Hubs
                 foreach (User user in userStorage.GetValueOrDefault(groupName))
                 {
                     temp.Add(user.getUserName());
+                }
+                return temp;
+            }
+            return null;
+        }
+        public static List<int> getScoresList(String groupName)
+        {
+            
+            List<int> temp = new List<int>();
+            if (userStorage.ContainsKey(groupName))
+            {
+
+                foreach (User user in userStorage.GetValueOrDefault(groupName))
+                {
+                    temp.Add(user.getScore());
                 }
                 return temp;
             }
