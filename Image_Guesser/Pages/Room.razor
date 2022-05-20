@@ -8,11 +8,12 @@
 
 
 <div class="gamePage">
-    <div class="lobbyContainer" style="display:@lobbyDisplay; margin:0 auto; text-align:center">
-        <h1>Room @gameCode</h1>
+    <h1 style="text-align:center"> Room @gameCode </h1>
+    <div class="lobbyContainer" style="display:@lobbyDisplay; margin:0 auto; text-align:center; transform: translate(0, 15vh);">
+        
         <h5 style="display: @enterNameScreenVisible"> Enter Username</h5>
         <input id="userBox" style="display:@enterNameScreenVisible; margin: auto" @bind="userInput">
-        <button class="btn btn-primary" id="submitButton" @onclick="JoinRoom" disabled="@(!CanJoinLobby)" style="display:@enterNameScreenVisible; margin: auto">Submit</button>
+        <button class="btn btn-primary" id="submitButton" @onclick="JoinRoom" disabled="@(!CanJoinLobby)" style="display:@enterNameScreenVisible; margin: auto; transform: translateY(5px);">Submit</button>
 
         <button class="btn btn-primary" id="readyButton" @onclick="setReadyStatus" disabled="@(!IsConnected)" style="visibility:@readyButtonVisisble">set ready status</button>
 
@@ -27,19 +28,19 @@
             }
         </ul>
 
-        <button class="btn btn-primary" id="startButton" @onclick="SendGameStart" disabled="@(!IsConnected)" style="display:@lobbyScreenVisible; margin:auto">Start Game</button>
+        <button class="btn btn-primary" id="startButton" @onclick="SendGameStart" disabled="@(!IsConnected)" style="display:@lobbyScreenVisible; margin:auto; transform: translateY(5px);">Start Game</button>
     </div>
     <div class="gameContainer">
         <div class="gameUserInfo">
-            <div style="float:left; visibility:@gameScreenVisible" class="gameUsername">Username</div>
-            <p style="visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayGameMessage</p>
-            <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen; float: left"> Your Score: @score</p>
+            <div style="float:left; visibility:@gameScreenVisible" class="gameUsername">@userInput</div>
+            
+            <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen; float: right"> Your Score: @score</p>
         </div>
-        <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen;"> @showTimer</p>
+        <p style="visibility:@gameScreenVisible;width: 400px"> @showTimer</p>
 
-        <img class="gameImage" src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="visibility:@gameScreenVisible;width:400px;height:340px;filter: blur(@game.getBlurValue()px)">
-
-        <ul class="gameChatMessages" style="visibility: @gameScreenVisible" id="messagesList">
+        <img class="gameImage" src="@game.getCurrentImage().getImageUrl()" alt="@game.getCurrentImage().getCorrectName()" style="visibility:@gameScreenVisible;width:400px;height:340px;filter: blur(@game.getBlurValue()px); margin: auto">
+        <p style="float:left; visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color;"> @displayGameMessage</p>
+        <ul class="gameChatMessages" style="visibility: @gameScreenVisible; height: 100%; overflow-y:scroll" id="messagesList">
             @foreach (var message in messages)
             {
                 <li>@message</li>
@@ -86,7 +87,7 @@
 
     private static Random random = new Random();
     private Game game = new Game();
-      
+
     protected override async Task OnInitializedAsync()
     {
 
@@ -190,8 +191,10 @@
 
     private async void sendGameMessage()
     {
+        
         await Send();
         getGuess();
+        messageInput = "";
     }
 
     private async void setNewImage()
@@ -199,6 +202,7 @@
         if (await allUsersReady())
         {
             await SetNewImage();
+            messages.Clear();
             allReady = true;
         }
     }
