@@ -131,7 +131,7 @@
             else if (message.Equals("new user ready"))
             {
                 setNewImage();
-            } 
+            }
             else if(message.Equals("sending scores"))
             {
                 scores = ChatHub.getScoresList(gameCode);
@@ -164,8 +164,11 @@
     async Task SendGameStart() =>
     await hubConnection.SendAsync("SendMessage", userInput, "%start game%", gameCode);
 
+    async Task SendCustomMessage(String message) =>
+    await hubConnection.SendAsync("SendMessage", userInput, message, gameCode);
+
     async Task SendScore() =>
-    await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
+await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
 
     async Task SendNewUser() =>
     await hubConnection.SendAsync("SendMessage", userInput, "new user ready", gameCode);
@@ -307,6 +310,7 @@
         //game.getCorrectWord().Equals(messageInput)
         string correct = game.getCurrentImage().getCorrectName();
         correct = removeNum(correct);
+
         if (String.Equals(correct, messageInput, StringComparison.OrdinalIgnoreCase) && !finishedRound)
         {
             displayGameMessage = "You got the answer correct!";
@@ -316,12 +320,16 @@
             messageInput = "";
             showTimer = "waiting for other players";
             Console.WriteLine("inGetGuess");
+            await SendCustomMessage("I got the answer!");
             await SendScore();
         }
         else
         {
             displayGameMessage = "You got the answer incorrect!";
             color = "darkorange";
+
+            await Send();
+            messageInput = "";
         }
         List<char> splitCorrect = new List<char>();
         List<char> splitGuess = new List<char>();
