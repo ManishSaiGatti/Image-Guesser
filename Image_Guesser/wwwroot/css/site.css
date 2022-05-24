@@ -76,6 +76,12 @@ app {
     display: inline-block;
 }
 
+.gameMessage {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 3;
+    grid-row-end: 4;
+}
 .main {
     flex: 1;
     height: 100vh;
