@@ -130,7 +130,7 @@ namespace Image_Guesser.Hubs
                 userStorage.GetValueOrDefault(groupName).Add(host);
                 await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
                 Console.WriteLine(userStorage.GetValueOrDefault(Context.ConnectionId));
-                //await Clients.Group(groupName).SendAsync("ReceiveMessage", groupName, $"{groupName} has been created.");
+                await Clients.Group(groupName).SendAsync("ReceiveMessage", groupName, $"{groupName} has been created.");
                 return true;
             }
             else
@@ -139,7 +139,7 @@ namespace Image_Guesser.Hubs
                 if (!work.Contains(Context.ConnectionId))
                 {
                     await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-                    //await Clients.Group(groupName).SendAsync("ReceiveMessage", Context.ConnectionId, "{userName} has joined the group {groupName}.");
+                    await Clients.Group(groupName).SendAsync("ReceiveMessage", Context.ConnectionId, $"{userName} has joined the group {groupName}.");
                     work.Add(new User(Context.ConnectionId, userName));
                 }
                 return true;
