@@ -122,11 +122,11 @@
         QueryHelpers.ParseQuery(uri.Query).TryGetValue("gamecode", out var gamecode);
         gameCode = gamecode;
 
-        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        hubConnection.On<string, string>("ReceiveMessage", async (user, message) =>
         {
             if (message.Equals("%start game%"))
             {
-                StartGame();
+                await StartGame();
             }
             else if (message.Equals("new user ready"))
             {
@@ -146,7 +146,6 @@
             }
 
         });
-
 
         await hubConnection.StartAsync();
     }
@@ -244,7 +243,7 @@
 
     }
 
-    private async void StartGame()
+    private async Task StartGame()
     {
         lobbyScreenVisible = "hidden";
         gameScreenVisible = "visible";
@@ -252,7 +251,7 @@
         scoreListVisible = "block";
         game = ChatHub.getHostGame(gameCode);
         round = 1;
-        startTimer();
+        await startTimer();
         //rescusitateTimer();
     }
 
@@ -413,7 +412,7 @@
                 if (isHost)
                 {
                     resetTimer();
-                    ChatHub.getGameHost(gameCode).timer = this.timer;
+                    ChatHub.getGameHost(gameCode).setTimer(this.timer);
                     await SetNewImage();
                 }
 
@@ -435,7 +434,8 @@
 
         }
     }
-    private async void startTimer()
+
+    private async Task startTimer()
     {
         prev = DateTime.Now;
         //this is a thread that calls itself
@@ -447,18 +447,20 @@
             if (blurVal < 0) blurVal = 0;
             await testEnd();
             game.getCurrentImage().decreaseBlur(blurVal);
-
+            
+            
             if (isHost)
             {
                 IncrementCount();
                 ChatHub.getGameHost(gameCode).setTimer(timer);
-
             }
 
             else
             {
-                timer = ChatHub.getGameHost(gameCode).timer;
+                timer = ChatHub.getGameHost(gameCode).getTimer();
             }
+            
+            //IncrementCount();
             Console.WriteLine(timer + ", " + endPoint);
 
             if (timer < 1)
@@ -469,8 +471,6 @@
                     finishedRound = true;
                 }
             }
-
-
 
             // the following line is so
             // Blazor recognizes the state change and refreshes the UI
@@ -496,7 +496,7 @@
 
     }
 
-    private async void rescusitateTimer()
+    private async Task rescusitateTimer()
     {
         int prevTime = timer;
         int counter = 0;
@@ -505,7 +505,7 @@
             if(counter > 1)
             {
                 Console.WriteLine("rescusitating");
-                startTimer();
+                await startTimer();
                 counter = 0;
             }
             if (prevTime == timer)

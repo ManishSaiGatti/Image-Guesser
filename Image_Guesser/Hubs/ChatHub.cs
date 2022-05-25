@@ -21,7 +21,7 @@ namespace Image_Guesser.Hubs
         private Game hostGame;
         private int score;
 
-        public int timer;
+        private int timer;
 
         public User(string connectionId, string userName)
         {
@@ -34,7 +34,7 @@ namespace Image_Guesser.Hubs
 
             score = 0;
 
-            timer = 0;
+            timer = 30;
 
         }
 
@@ -67,7 +67,12 @@ namespace Image_Guesser.Hubs
         {
             return score;
         }
-        
+
+        public int getTimer()
+        {
+            return timer;
+        }
+
         public void setScore(int score)
         {
             this.score = score;
