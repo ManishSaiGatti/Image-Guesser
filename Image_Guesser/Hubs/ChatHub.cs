@@ -144,7 +144,7 @@ namespace Image_Guesser.Hubs
                 if (!work.Contains(Context.ConnectionId))
                 {
                     await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-                    await Clients.Group(groupName).SendAsync("ReceiveMessage", Context.ConnectionId, $"{Context.ConnectionId} has joined the group {groupName}.");
+                    await Clients.Group(groupName).SendAsync("ReceiveMessage", Context.ConnectionId, $"{userName} has joined the group {groupName}.");
                     work.Add(new User(Context.ConnectionId, userName));
                 }
                 return true;

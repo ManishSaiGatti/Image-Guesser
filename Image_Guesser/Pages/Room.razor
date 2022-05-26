@@ -33,11 +33,11 @@
     <div class="gameContainer">
         <div class="gameUserInfo">
             <div style="float:left; visibility:@gameScreenVisible" class="gameUsername">@userInput</div>
-            <p style="float:left; visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color; transform:translate(28vw)"> @displayGameMessage</p>
+            <p class ="gameMessage"style="float:left; visibility:@gameScreenVisible;width: 250px; border:3px; border-style:solid; border-color: @color; text-align: center; transform:translate(24vw)"> @displayGameMessage</p>
             <p>@closeMessage</p>
             <p style="visibility:@gameScreenVisible;width: 150px; border:3px; border-style:solid; border-color: darkgreen; float: right"> Your Score: @score</p>
         </div>
-        <p style="visibility:@gameScreenVisible;width: 400px"> @showTimer</p>
+        <p style="visibility:@gameScreenVisible;width: 400px; text-align: center"> @showTimer</p>
 
         <table class="scoreList" style="opacity:@tableVis; display: @scoreListVisible; float:left;">
         @{
@@ -131,7 +131,7 @@
             else if (message.Equals("new user ready"))
             {
                 setNewImage();
-            } 
+            }
             else if(message.Equals("sending scores"))
             {
                 scores = ChatHub.getScoresList(gameCode);
@@ -163,8 +163,11 @@
     async Task SendGameStart() =>
     await hubConnection.SendAsync("SendMessage", userInput, "%start game%", gameCode);
 
+    async Task SendCustomMessage(String message) =>
+    await hubConnection.SendAsync("SendMessage", userInput, message, gameCode);
+
     async Task SendScore() =>
-    await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
+await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
 
     async Task SendNewUser() =>
     await hubConnection.SendAsync("SendMessage", userInput, "new user ready", gameCode);
@@ -282,7 +285,7 @@
 
     private int round = 1;
     private int score = 0;
-    private string displayGameMessage = "Guess";
+    private string displayGameMessage = "Enter a guess";
     private int endPoint;
 
 
@@ -306,6 +309,7 @@
         //game.getCorrectWord().Equals(messageInput)
         string correct = game.getCurrentImage().getCorrectName();
         correct = removeNum(correct);
+
         if (String.Equals(correct, messageInput, StringComparison.OrdinalIgnoreCase) && !finishedRound)
         {
             displayGameMessage = "You got the answer correct!";
@@ -315,12 +319,16 @@
             messageInput = "";
             showTimer = "waiting for other players";
             Console.WriteLine("inGetGuess");
+            await SendCustomMessage("I got the answer!");
             await SendScore();
         }
         else
         {
             displayGameMessage = "You got the answer incorrect!";
             color = "darkorange";
+
+            await Send();
+            messageInput = "";
         }
         List<char> splitCorrect = new List<char>();
         List<char> splitGuess = new List<char>();
