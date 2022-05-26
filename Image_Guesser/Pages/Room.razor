@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.WebUtilities;
 @using Image_Guesser.Hubs;
 @using Image_Guesser.Data
+@using System.Collections.Specialized 
 @inject NavigationManager NavigationManager
 
 
@@ -65,9 +66,10 @@
         <div class="form-group gameChatEntry" style="visibility: @gameScreenVisible">
             <label>
                 Guess:
-                <input style="width:200px" @bind="messageInput" size="50" />
+                <input style="width:200px" @bind="messageInput" @onkeydown="Enter" @onkeyup="Enter" size="50" />
             </label>
-            <button @onclick="getGuess" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
+            <button @onclick="getGuess" @onkeydown="Enter" @onkeyup="Enter" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
+            <p>@messageInput</p>
         </div>
 
 
@@ -86,7 +88,7 @@
     private List<string> messages = new List<string>();
 
     private string userInput = "";
-    private string messageInput;
+    private string messageInput = "";
     private string gameCode;
 
     private String color = "red";
@@ -131,7 +133,7 @@
             else if (message.Equals("new user ready"))
             {
                 setNewImage();
-            } 
+            }
             else if(message.Equals("sending scores"))
             {
                 scores = ChatHub.getScoresList(gameCode);
@@ -214,7 +216,6 @@
     private async void sendGameMessage()
     {
 
-        await Send();
         getGuess();
         messageInput = "";
     }
@@ -532,5 +533,13 @@
         messageInput = "";
 
 
+    }
+
+    public void Enter(KeyboardEventArgs e)
+    {
+        if (e.Code == "Enter" || e.Code == "NumpadEnter")
+        {
+            getGuess();
+        }
     }
 }
