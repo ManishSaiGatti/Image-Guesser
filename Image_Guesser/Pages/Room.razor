@@ -11,7 +11,7 @@
 <div class="gamePage">
     <h1 style="text-align:center; display: @lobbyDisplay"> Room @gameCode </h1>
     <div class="lobbyContainer" style="display:@lobbyDisplay; margin:0 auto; text-align:center; transform: translate(0, 15vh);">
-        
+
         <h5 style="display: @enterNameScreenVisible"> Enter Username</h5>
         <input id="userBox" style="display:@enterNameScreenVisible; margin: auto" @bind="userInput">
         <button class="btn btn-primary" id="submitButton" @onclick="JoinRoom" disabled="@(!CanJoinLobby)" style="display:@enterNameScreenVisible; margin: auto; transform: translateY(5px);">Submit</button>
