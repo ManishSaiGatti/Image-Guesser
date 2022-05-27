@@ -107,7 +107,7 @@ namespace Image_Guesser.Hubs
         private static Dictionary<String, ArrayList> userStorage = new Dictionary<String, ArrayList>();
         public async Task SendMessage(string user, string message, string groupName)
         {
-            if (userStorage.ContainsKey(groupName))
+            if (userStorage.ContainsKey(groupName) && !message.Equals(""))
             {
                 Console.WriteLine("sending message rn");
 
@@ -153,7 +153,8 @@ namespace Image_Guesser.Hubs
         }
         public async Task<bool> CheckGroup(string groupName)
         {
-            if (!userStorage.ContainsKey(groupName))
+            
+            if (string.IsNullOrEmpty(groupName) || !userStorage.ContainsKey(groupName))
             {
                 return false;
             }

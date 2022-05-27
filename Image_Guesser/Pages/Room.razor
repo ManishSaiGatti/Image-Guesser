@@ -456,8 +456,8 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
             if (blurVal < 0) blurVal = 0;
             await testEnd();
             game.getCurrentImage().decreaseBlur(blurVal);
-            
-            
+
+
             if (isHost)
             {
                 IncrementCount();
@@ -468,9 +468,9 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
             {
                 timer = ChatHub.getGameHost(gameCode).getTimer();
             }
-            
-            //IncrementCount();
-            Console.WriteLine(timer + ", " + endPoint);
+
+        //IncrementCount();
+        Console.WriteLine(timer + ", " + endPoint);
 
             if (timer < 1)
             {
@@ -481,9 +481,9 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
                 }
             }
 
-            // the following line is so
-            // Blazor recognizes the state change and refreshes the UI
-            await InvokeAsync(() =>
+        // the following line is so
+        // Blazor recognizes the state change and refreshes the UI
+        await InvokeAsync(() =>
             {
                 StateHasChanged();
             });
@@ -533,12 +533,13 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
         timer = TIMER_MAX;
     }
 
-    private  void startNextRound()
+    private void startNextRound()
     {
 
 
-
+        displayGameMessage = "Enter a guess";
         messageInput = "";
+        color = "red";
 
 
     }
