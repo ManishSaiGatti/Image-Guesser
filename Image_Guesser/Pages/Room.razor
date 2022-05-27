@@ -132,7 +132,7 @@
             {
                 setNewImage();
             }
-            else if(message.Equals("sending scores"))
+            else if (message.Equals("sending scores"))
             {
                 scores = ChatHub.getScoresList(gameCode);
             }
@@ -252,9 +252,15 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
         gameScreenVisible = "visible";
         lobbyDisplay = "none";
         scoreListVisible = "block";
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
         game = ChatHub.getHostGame(gameCode);
         round = 1;
-        await startTimer();
+        startTimer();
+        IncrementCount();
+
         //rescusitateTimer();
     }
 
@@ -276,6 +282,8 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
 
 
     private const int TIMER_MAX = 30;
+    private const int ROUND_MAX = 5;
+
     private int timer;
     private string showTimer = "Welcome to Image Guesser";
     DateTime prev = DateTime.Now;
@@ -383,7 +391,7 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
     bool isHost = false;
     private async Task testEnd()
     {
-        if (round > 10)
+        if (round > ROUND_MAX)
         {
             showTimer = "Thanks for playing! Your score was:" + score;
             await InvokeAsync(() =>
@@ -448,26 +456,19 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
         prev = DateTime.Now;
         //this is a thread that calls itself
 
-        var loop = new Timer(new TimerCallback(async _ =>
+        while (round < ROUND_MAX)
         {
-
             int blurVal = timer - 10;
             if (blurVal < 0) blurVal = 0;
             await testEnd();
             game.getCurrentImage().decreaseBlur(blurVal);
-            
-            
-            if (isHost)
-            {
-                IncrementCount();
-                ChatHub.getGameHost(gameCode).setTimer(timer);
-            }
 
-            else
-            {
-                timer = ChatHub.getGameHost(gameCode).getTimer();
-            }
-            
+
+
+
+
+
+
             //IncrementCount();
             Console.WriteLine(timer + ", " + endPoint);
 
@@ -486,20 +487,30 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
             {
                 StateHasChanged();
             });
-        }), null, 0, 100);
-
+            Thread.Sleep(100);
+        }
     }
-    private void IncrementCount()
+
+    public async void runTimer()
     {
-        curr = DateTime.Now;
+        while (true)
+        {
+            if (true)
+            {
+                //await IncrementCount();
+                //ChatHub.getGameHost(gameCode).setTimer(timer);
+            }
+        }
+    }
 
-        int deltaTime = curr.Second - prev.Second;
-        //edge case for when time wraps around 60 to 0
-        if (Math.Abs(deltaTime) >= 59) deltaTime = Math.Abs(deltaTime) - 58;
-        prev = curr;
+    private async void IncrementCount()
+    {
+        while (true)
+        {
+            Thread.Sleep(1000);
+            timer--;
+        }
 
-        timer -= deltaTime;
-        Console.WriteLine(timer);
 
 
     }
