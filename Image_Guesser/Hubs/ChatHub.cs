@@ -105,9 +105,10 @@ namespace Image_Guesser.Hubs
     {
         // the key is group code, the ArrayList contains all users in the group
         private static Dictionary<String, ArrayList> userStorage = new Dictionary<String, ArrayList>();
+        public static Dictionary<String, int> roomTimers = new Dictionary<String, int>();
         public async Task SendMessage(string user, string message, string groupName)
         {
-            if (userStorage.ContainsKey(groupName))
+            if (userStorage.ContainsKey(groupName) && !message.Equals(""))
             {
                 Console.WriteLine("sending message rn");
 
@@ -130,6 +131,7 @@ namespace Image_Guesser.Hubs
             if (!userStorage.ContainsKey(groupName))
             {
                 userStorage.Add(groupName, new ArrayList());
+                roomTimers.Add(groupName, 30);
                 User host = new User(Context.ConnectionId, userName);
                 host.setIsHost();
                 userStorage.GetValueOrDefault(groupName).Add(host);
@@ -153,7 +155,8 @@ namespace Image_Guesser.Hubs
         }
         public async Task<bool> CheckGroup(string groupName)
         {
-            if (!userStorage.ContainsKey(groupName))
+            
+            if (string.IsNullOrEmpty(groupName) || !userStorage.ContainsKey(groupName))
             {
                 return false;
             }

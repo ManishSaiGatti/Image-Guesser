@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.WebUtilities;
 @using Image_Guesser.Hubs;
 @using Image_Guesser.Data
+@using System.Timers
 @using System.Collections.Specialized 
 @inject NavigationManager NavigationManager
 
@@ -113,6 +114,8 @@
     double visibility = 1;
     double tableVis = 1;
 
+
+
     protected override async Task OnInitializedAsync()
     {
 
@@ -189,8 +192,11 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
     async Task SetNewImage() =>
         await hubConnection.SendAsync("SetNewImage", gameCode);
 
+
     async Task<bool> allUsersReady() =>
      await hubConnection.InvokeAsync<bool>("allUsersReady", gameCode);
+
+
 
     private async Task<bool> usersReady()
     {
@@ -293,6 +299,8 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
     private String closeMessage = "";
     private String showCorrect = "";
     private String showGuess = "";
+
+    private static System.Timers.Timer aTimer;
 
     private String removeNum(String word)
     {
@@ -413,7 +421,7 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
         prevFinishedRound = finishedRound;
         if (allReady)
         {
-            showTimer = "the correct word was: " + (game.getCorrectWord()) + "\nnew game starting!";
+            showTimer = "the correct word was: " + (game.getCorrectWord()) + "\nnew round starting!";
             if (timer - endPoint < -1)
             {
                 Console.WriteLine("bro?? \n");
@@ -421,7 +429,8 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
                 if (isHost)
                 {
                     resetTimer();
-                    ChatHub.getGameHost(gameCode).setTimer(this.timer);
+                    //ChatHub.getGameHost(gameCode).setTimer(this.timer);
+                    ChatHub.roomTimers[gameCode] = timer;
                     await SetNewImage();
                 }
 
@@ -447,48 +456,82 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
     private async Task startTimer()
     {
         prev = DateTime.Now;
+        timer = 30;
         //this is a thread that calls itself
-
-        var loop = new Timer(new TimerCallback(async _ =>
-        {
+        aTimer = new System.Timers.Timer(1000);
+        aTimer.Elapsed += OnTimedEvent;
+        aTimer.AutoReset = true;
+        aTimer.Enabled = true;
+            /*
+            var loop = new Timer(new TimerCallback(async _ =>
+            {
 
             int blurVal = timer - 10;
             if (blurVal < 0) blurVal = 0;
-            await testEnd();
-            game.getCurrentImage().decreaseBlur(blurVal);
-            
-            
+        await testEnd();
+        game.getCurrentImage().decreaseBlur(blurVal);
+
+            timer = ChatHub.roomTimers.GetValueOrDefault(gameCode);
+                if (isHost)
+                {
+                IncrementCount();
+            ChatHub.roomTimers[gameCode] = timer;
+                }
+
+
+        Console.WriteLine(timer + ", " + endPoint);
+
+        if (timer < 1)
+    {
+
+    if (!finishedRound)
+    {
+    finishedRound = true;
+    }
+    }
+
+    // the following line is so
+    // Blazor recognizes the state change and refreshes the UI
+    await InvokeAsync(() =>
+            {
+            StateHasChanged();
+    });
+    }), null, 0, 100);
+    */
+    }
+
+    private async void OnTimedEvent(Object source, ElapsedEventArgs e)
+    {
+        timer -= 1;
+        int blurVal = timer - 10;
+        if (blurVal < 0) blurVal = 0;
+        await testEnd();
+        game.getCurrentImage().decreaseBlur(blurVal);
+        /*
+        timer = ChatHub.roomTimers.GetValueOrDefault(gameCode);
             if (isHost)
             {
-                IncrementCount();
-                ChatHub.getGameHost(gameCode).setTimer(timer);
-            }
+            IncrementCount();
+            ChatHub.roomTimers[gameCode] = timer;
+        }
 
-            else
+        Console.WriteLine(timer + ", " + endPoint);
+        */
+        if (timer < 1)
+        {
+            if (!finishedRound)
             {
-                timer = ChatHub.getGameHost(gameCode).getTimer();
+                finishedRound = true;
             }
-            
-            //IncrementCount();
-            Console.WriteLine(timer + ", " + endPoint);
+        }
 
-            if (timer < 1)
+        // the following line is so
+        // Blazor recognizes the state change and refreshes the UI
+        await InvokeAsync(StateHasChanged);
+        /*await InvokeAsync(() =>
             {
-
-                if (!finishedRound)
-                {
-                    finishedRound = true;
-                }
-            }
-
-            // the following line is so
-            // Blazor recognizes the state change and refreshes the UI
-            await InvokeAsync(() =>
-            {
-                StateHasChanged();
-            });
-        }), null, 0, 100);
-
+            StateHasChanged();
+         });*/        
     }
     private void IncrementCount()
     {
@@ -533,13 +576,14 @@ await hubConnection.SendAsync("SendScore", userInput, score, gameCode);
         timer = TIMER_MAX;
     }
 
-    private  void startNextRound()
+    private void startNextRound()
     {
 
 
-
+        displayGameMessage = "Enter a guess";
         messageInput = "";
-
+        color = "red";
+        timer = ChatHub.roomTimers.GetValueOrDefault(gameCode);
 
     }
 
