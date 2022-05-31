@@ -67,10 +67,10 @@
         <div class="form-group gameChatEntry" style="visibility: @gameScreenVisible">
             <label>
                 Guess:
-                <input style="width:200px" @bind="messageInput" @onkeydown="Enter" @onkeyup="Enter" size="50" />
+                <input style="width:200px" @bind="messageInput" @onkeyup="Enter" size="50" />
             </label>
-            <button @onclick="getGuess" @onkeydown="Enter" @onkeyup="Enter" disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
-            <p>@messageInput</p>
+            <button @onclick="getGuess"  disabled="@(!IsConnected)" style="visibility:@gameScreenVisible">Send</button>
+
         </div>
 
 
