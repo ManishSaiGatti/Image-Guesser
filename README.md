@@ -1,4 +1,4 @@
-# choice-project-image-guesser
-choice-project-image-guesser created by GitHub Classroom
-
-https://imageguesser.azurewebsites.net/
+# Image Guesser
+This is a simple image guessing game based on the
+popular online game skribbl.io. The game was made
+using C# and Blazor.
